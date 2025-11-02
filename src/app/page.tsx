@@ -1,40 +1,29 @@
-import Head from "next/head";
-import Header from "@/components/views/landing-page/Header";
-import Hero from "@/components/views/landing-page/Hero";
-import SocialProof from "@/components/views/landing-page/SocialProof";
-import Features from "@/components/views/landing-page/Features";
-import About from "@/components/views/landing-page/About";
-import Testimonials from "@/components/views/landing-page/Testimonials";
-import CTA from "@/components/views/landing-page/CTA";
-import Footer from "@/components/views/landing-page/Footer";
+import { PublicHeader } from "@/components/navigation/public-header";
+import { PublicFooter } from "@/components/navigation/public-footer";
+import { HeroSection } from "@/components/landing/hero-section";
+import { SocialProofSection } from "@/components/landing/social-proof-section";
+import { HowItWorksSection } from "@/components/landing/how-it-works-section";
+import { CapabilitiesSection } from "@/components/landing/capabilities-section";
+
+export const metadata = {
+  title: "Boring Automation - The Fastest Way to Automate with AI",
+  description:
+    "Empower your sales, marketing, and operations teams with AI agents that work 24/7. Setup in 7 days, trusted by 50,000+ companies.",
+};
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-background via-background to-secondary/20">
-      <Head>
-        <title>POSITIVE-Next: Your Mind&apos;s Best Friend</title>
-        <meta
-          name="description"
-          content="Transform your mindset with POSITIVE-Next - the AI-powered mental fitness companion that helps you overcome mental saboteurs."
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <div className="flex flex-col min-h-screen">
+      <PublicHeader />
 
-      <Header />
-
-      <main className="flex-grow relative">
-        <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-transparent -z-10" />
-
-        <Hero />
-        <SocialProof />
-        <Features />
-        <About />
-        <Testimonials />
-        <CTA />
+      <main className="flex-grow">
+        <HeroSection />
+        <SocialProofSection />
+        <HowItWorksSection />
+        <CapabilitiesSection />
       </main>
 
-      <Footer />
+      <PublicFooter />
     </div>
   );
 }

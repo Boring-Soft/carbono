@@ -1,25 +1,29 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { StatsOverview } from "@/components/dashboard/stats-overview";
+import { RecentActivity } from "@/components/dashboard/recent-activity";
+import { CreditsChart } from "@/components/dashboard/credits-chart";
+import { DaptaAcademy } from "@/components/dashboard/dapta-academy";
 
 export default async function DashboardPage() {
-  const supabase = createServerComponentClient({ cookies });
-  const { data: { session } } = await supabase.auth.getSession();
-
-  if (!session) {
-    redirect("/sign-in");
-  }
+  // Authentication disabled for frontend design purposes
 
   return (
     <div className="space-y-8">
-      <div className="bg-card rounded-lg p-6">
-        <h2 className="text-2xl font-semibold mb-4">Dashboard Overview</h2>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">Dashboard</h1>
         <p className="text-muted-foreground">
-          This is your protected dashboard page. You can start adding your content here.
+          Welcome back! Here's an overview of your automation performance.
         </p>
       </div>
-      
-      {/* Add more dashboard sections here */}
+      <StatsOverview />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <RecentActivity />
+        </div>
+        <div className="lg:col-span-1">
+          <CreditsChart />
+        </div>
+      </div>
+      <DaptaAcademy />
     </div>
   );
 } 

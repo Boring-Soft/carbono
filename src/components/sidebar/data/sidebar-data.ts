@@ -1,21 +1,14 @@
 import {
-  AlertCircle,
-  AppWindow,
-  AudioWaveform,
-  Ban,
-  Bug,
-  CheckSquare,
-  Command,
-  GalleryVerticalEnd,
-  HelpCircle,
-  LayoutDashboard,
-  Lock,
-  LockKeyhole,
-  MessageSquare,
-  Settings,
-  ServerCrash,
-  UserX,
+  Home,
+  Phone,
+  PhoneCall,
+  TestTube2,
+  Megaphone,
   Users,
+  MessageSquare,
+  Workflow,
+  Database,
+  Command,
 } from "lucide-react";
 import type { SidebarData } from "../types";
 
@@ -27,127 +20,70 @@ export const sidebarData: SidebarData = {
   },
   teams: [
     {
-      name: "Shadcn Admin",
+      name: "Boring Automation",
       logo: Command,
-      plan: "Vite + ShadcnUI",
+      plan: "Professional",
     },
     {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
+      name: "My Workspace",
+      logo: Command,
+      plan: "Free",
     },
   ],
   navGroups: [
     {
-      title: "General",
+      title: "Main",
       items: [
         {
-          title: "Dashboard",
-          url: "/",
-          icon: LayoutDashboard,
+          title: "Home",
+          url: "/dashboard",
+          icon: Home,
         },
         {
-          title: "Tasks",
-          url: "/tasks",
-          icon: CheckSquare,
+          title: "Voice Agents",
+          icon: Phone,
+          items: [
+            {
+              title: "Agents",
+              url: "/dashboard/voice-agents/agents",
+              icon: PhoneCall,
+            },
+            {
+              title: "Phone Numbers",
+              url: "/dashboard/voice-agents/phone-numbers",
+              icon: Phone,
+            },
+            {
+              title: "Test Numbers",
+              url: "/dashboard/voice-agents/test-numbers",
+              icon: TestTube2,
+            },
+          ],
         },
         {
-          title: "Apps",
-          url: "/apps",
-          icon: AppWindow,
+          title: "Campaigns",
+          url: "/dashboard/campaigns",
+          icon: Megaphone,
         },
         {
-          title: "Chats",
-          url: "/chats",
-          badge: "3",
+          title: "CRM",
+          url: "/dashboard/crm",
+          icon: Users,
+        },
+        {
+          title: "Text Agents",
+          url: "/dashboard/text-agents",
           icon: MessageSquare,
         },
         {
-          title: "Users",
-          url: "/users",
-          icon: Users,
-        },
-      ],
-    },
-    {
-      title: "Pages",
-      items: [
-        {
-          title: "Auth",
-          icon: Lock,
-          items: [
-            {
-              title: "Sign In",
-              url: "/sign-in",
-            },
-            {
-              title: "Sign In (2 Col)",
-              url: "/sign-in-2",
-            },
-            {
-              title: "Sign Up",
-              url: "/sign-up",
-            },
-            {
-              title: "Forgot Password",
-              url: "/forgot-password",
-            },
-            {
-              title: "OTP",
-              url: "/otp",
-            },
-          ],
+          title: "Flow Studio",
+          url: "/dashboard/flow-studio",
+          icon: Workflow,
         },
         {
-          title: "Errors",
-          icon: Bug,
-          items: [
-            {
-              title: "Unauthorized",
-              url: "/401",
-              icon: LockKeyhole,
-            },
-            {
-              title: "Forbidden",
-              url: "/403",
-              icon: UserX,
-            },
-            {
-              title: "Not Found",
-              url: "/404",
-              icon: AlertCircle,
-            },
-            {
-              title: "Internal Server Error",
-              url: "/500",
-              icon: ServerCrash,
-            },
-            {
-              title: "Maintenance Error",
-              url: "/503",
-              icon: Ban,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      title: "Other",
-      items: [
-        {
-          title: "Settings",
-          icon: Settings,
-          url: "/settings",
-        },
-        {
-          title: "Help Center",
-          url: "/help-center",
-          icon: HelpCircle,
+          title: "Data Studio",
+          url: "/dashboard/data-studio",
+          icon: Database,
         },
       ],
     },

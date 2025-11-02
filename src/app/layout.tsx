@@ -6,8 +6,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ThemeProvider } from "@/context/theme-context";
 
-const APP_NAME = "POSITIVE-NEXT";
-const APP_DESCRIPTION = "Your Mind's Best Friend";
+const APP_NAME = "Boring Automation";
+const APP_DESCRIPTION = "The fastest way to automate with AI - Empower your teams with 24/7 AI agents";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     description: APP_DESCRIPTION,
     url: APP_URL,
     siteName: APP_NAME,
-    locale: "es_ES",
+    locale: "en_US",
     type: "website",
   },
   robots: {
@@ -65,7 +65,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider defaultTheme="system" storageKey="app-theme">
+        <ThemeProvider defaultTheme="dark" storageKey="app-theme">
           <AuthProvider>
             <QueryProvider>
               {children}

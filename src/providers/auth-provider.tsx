@@ -32,7 +32,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const supabase = createClientComponentClient();
+
+  // Check if Supabase credentials are available and valid
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  const hasSupabaseCredentials =
+    supabaseUrl &&
+    supabaseKey &&
+    supabaseUrl.startsWith("http") &&
+    !supabaseUrl.includes("your-") && // Check for placeholder
+    !supabaseKey.includes("your-"); // Check for placeholder
+
+  // Only create Supabase client if credentials exist and are valid
+  let supabase = null;
+  try {
+    if (hasSupabaseCredentials) {
+      supabase = createClientComponentClient();
+    }
+  } catch (error) {
+    console.warn("Supabase client creation failed. Running without authentication.");
+  }
 
   // Fetch profile function
   const fetchProfile = async (userId: string) => {
@@ -49,6 +69,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
+    // If no Supabase credentials, just mark as not loading
+    if (!supabase) {
+      setIsLoading(false);
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -83,6 +109,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router, supabase]);
 
   const signIn = async (email: string, password: string) => {
+    if (!supabase) {
+      throw new Error("Supabase is not configured. Please set up environment variables.");
+    }
     const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -95,6 +124,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string) => {
+    if (!supabase) {
+      throw new Error("Supabase is not configured. Please set up environment variables.");
+    }
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -103,6 +135,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    if (!supabase) {
+      throw new Error("Supabase is not configured. Please set up environment variables.");
+    }
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     setProfile(null);
