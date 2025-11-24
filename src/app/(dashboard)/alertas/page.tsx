@@ -1,15 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertsTable } from "@/components/alertas/alerts-table";
 import { AlertDetailDialog } from "@/components/alertas/alert-detail-dialog";
-import { CarbonMap } from "@/components/dashboard/carbono/carbon-map";
 import { AlertListItem } from "@/types/alert";
 import { AlertMarkerData } from "@/components/maps/alert-marker";
 import { AlertTriangle, Map } from "lucide-react";
+
+// Dynamically import CarbonMap to avoid SSR issues with Leaflet
+const CarbonMap = dynamic(
+  () => import("@/components/dashboard/carbono/carbon-map").then((mod) => mod.CarbonMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[700px] flex items-center justify-center bg-muted rounded-lg">
+        <div className="text-muted-foreground">Cargando mapa...</div>
+      </div>
+    ),
+  }
+);
 
 async function fetchAlerts() {
   const response = await fetch("/api/alerts?limit=100");

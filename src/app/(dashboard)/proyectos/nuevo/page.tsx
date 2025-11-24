@@ -1,31 +1,38 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { ProjectForm } from "@/components/proyectos/project-form";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-async function getOrganizations() {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/api/organizations`,
-      {
-        cache: "no-store",
-      }
-    );
-
-    if (!response.ok) {
-      return [];
-    }
-
-    const data = await response.json();
-    return data.data || [];
-  } catch (error) {
-    console.error("Error fetching organizations:", error);
-    return [];
-  }
+interface Organization {
+  id: string;
+  name: string;
+  type: string;
 }
 
-export default async function NuevoProyectoPage() {
-  const organizations = await getOrganizations();
+export default function NuevoProyectoPage() {
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchOrganizations() {
+      try {
+        const response = await fetch("/api/organizations");
+        if (response.ok) {
+          const data = await response.json();
+          setOrganizations(data.data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching organizations:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchOrganizations();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -45,7 +52,13 @@ export default async function NuevoProyectoPage() {
         </div>
       </div>
 
-      <ProjectForm organizations={organizations} />
+      {isLoading ? (
+        <div className="text-center py-8 text-muted-foreground">
+          Cargando formulario...
+        </div>
+      ) : (
+        <ProjectForm organizations={organizations} />
+      )}
     </div>
   );
 }

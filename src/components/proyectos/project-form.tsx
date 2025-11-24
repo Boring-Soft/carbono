@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,9 +22,21 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import { ProjectMapDrawer } from "./project-map-drawer";
 import { CarbonPreview } from "./carbon-preview";
 import { CreateOrganizationDialog } from "../organizaciones/create-organization-dialog";
+
+// Dynamically import ProjectMapDrawer to avoid SSR issues with Leaflet
+const ProjectMapDrawer = dynamic(
+  () => import("./project-map-drawer").then((mod) => mod.ProjectMapDrawer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[400px] flex items-center justify-center bg-muted rounded-lg">
+        <div className="text-muted-foreground">Cargando mapa...</div>
+      </div>
+    ),
+  }
+);
 import {
   ArrowLeft,
   ArrowRight,

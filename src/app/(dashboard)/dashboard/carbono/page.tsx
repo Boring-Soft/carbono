@@ -1,15 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
 import { StatsCards } from "@/components/dashboard/carbono/stats-cards";
-import { CarbonMap } from "@/components/dashboard/carbono/carbon-map";
 import { MapControls } from "@/components/dashboard/carbono/map-controls";
 import { FiltersBar, DashboardFilters } from "@/components/dashboard/carbono/filters-bar";
 import { TrendCharts } from "@/components/dashboard/carbono/trend-charts";
 import { ProjectMarkerData } from "@/components/maps/project-marker";
 import { AlertMarkerData } from "@/components/maps/alert-marker";
 import { ProjectStatus } from "@prisma/client";
+
+// Dynamically import CarbonMap to avoid SSR issues with Leaflet
+const CarbonMap = dynamic(
+  () => import("@/components/dashboard/carbono/carbon-map").then((mod) => mod.CarbonMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[600px] flex items-center justify-center bg-muted rounded-lg">
+        <div className="text-muted-foreground">Cargando mapa...</div>
+      </div>
+    ),
+  }
+);
 
 async function fetchDashboardStats() {
   const response = await fetch("/api/dashboard/stats");
