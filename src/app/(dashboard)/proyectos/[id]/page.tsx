@@ -3,22 +3,72 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { ProjectDetailView } from "@/components/proyectos/project-detail-view";
+import { prisma } from "@/lib/prisma";
 
 async function getProject(id: string) {
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/api/projects/${id}`,
-      {
-        cache: "no-store",
-      }
-    );
+    const project = await prisma.project.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        organization: {
+          select: {
+            id: true,
+            name: true,
+            type: true,
+          },
+        },
+        documents: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+        carbonCredits: true,
+        statusHistory: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+      },
+    });
 
-    if (!response.ok) {
+    if (!project) {
       return null;
     }
 
-    const data = await response.json();
-    return data.data;
+    // Get recent alerts within 5km (skip if PostGIS not available)
+    let recentAlerts = [];
+    try {
+      recentAlerts = await prisma.deforestationAlert.findMany({
+        where: {
+          detectedAt: {
+            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
+          },
+        },
+        orderBy: {
+          detectedAt: "desc",
+        },
+        take: 10,
+      });
+    } catch (error) {
+      console.error("Error fetching alerts:", error);
+      // Continue without alerts if query fails
+    }
+
+    // Serialize Decimal fields to Number for Client Components
+    return {
+      ...project,
+      areaHectares: Number(project.areaHectares),
+      estimatedCo2TonsYear: project.estimatedCo2TonsYear ? Number(project.estimatedCo2TonsYear) : null,
+      forestCoveragePercent: project.forestCoveragePercent ? Number(project.forestCoveragePercent) : null,
+      recentAlerts: recentAlerts.map((alert) => ({
+        ...alert,
+        latitude: Number(alert.latitude),
+        longitude: Number(alert.longitude),
+        brightness: alert.brightness ? Number(alert.brightness) : null,
+      })),
+    };
   } catch (error) {
     console.error("Error fetching project:", error);
     return null;

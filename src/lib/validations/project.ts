@@ -52,7 +52,9 @@ export const createProjectSchema = z.object({
 
   description: z.string()
     .max(2000, 'La descripción no puede exceder 2000 caracteres')
-    .optional(),
+    .optional()
+    .nullable()
+    .or(z.literal("")),
 
   geometry: geometrySchema,
 
@@ -62,30 +64,38 @@ export const createProjectSchema = z.object({
 
   municipality: z.string()
     .trim()
-    .optional(),
+    .optional()
+    .nullable()
+    .or(z.literal("")),
 
   organizationId: z.string()
     .cuid('ID de organización inválido'),
 
   communities: z.string()
     .max(500, 'Las comunidades no pueden exceder 500 caracteres')
-    .optional(),
+    .optional()
+    .nullable()
+    .or(z.literal("")),
 
   coBenefits: z.array(z.string())
     .max(10, 'Máximo 10 co-beneficios')
-    .optional(),
+    .optional()
+    .nullable(),
 
   startDate: z.coerce.date()
-    .optional(),
+    .optional()
+    .nullable(),
 
   durationYears: z.number()
     .int('La duración debe ser un número entero')
     .min(1, 'La duración mínima es 1 año')
     .max(100, 'La duración máxima es 100 años')
-    .optional(),
+    .optional()
+    .nullable(),
 
   createdBy: z.string()
-    .optional(),
+    .optional()
+    .nullable(),
 });
 
 /**

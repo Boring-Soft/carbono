@@ -20,14 +20,14 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Calculate totals
+    // Calculate totals - Convert Prisma Decimal to Number
     const totalHectares = activeProjects.reduce(
-      (sum, p) => sum + p.areaHectares,
+      (sum, p) => sum + Number(p.areaHectares),
       0
     );
 
     const totalCo2Year = activeProjects.reduce(
-      (sum, p) => sum + (p.estimatedCo2TonsYear || 0),
+      (sum, p) => sum + Number(p.estimatedCo2TonsYear || 0),
       0
     );
 

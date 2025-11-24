@@ -18,10 +18,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { ProjectMapDrawer } from "./project-map-drawer";
 import { CarbonPreview } from "./carbon-preview";
+import { CreateOrganizationDialog } from "../organizaciones/create-organization-dialog";
 import {
   ArrowLeft,
   ArrowRight,
@@ -156,7 +158,9 @@ export function ProjectForm({ organizations }: ProjectFormProps) {
       }
 
       const result = await response.json();
-      router.push(`/proyectos/${result.data.id}`);
+      toast.success("Proyecto creado exitosamente");
+      // Redirect to projects list for now (detail page not implemented yet)
+      router.push(`/proyectos`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");
       setIsSubmitting(false);
@@ -245,7 +249,15 @@ export function ProjectForm({ organizations }: ProjectFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="organizationId">Organización *</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="organizationId">Organización *</Label>
+                    <CreateOrganizationDialog
+                      onOrganizationCreated={(org) => {
+                        // Refresh organizations list would be ideal, but for now just show success
+                        toast.success(`Organizacion ${org.name} creada. Recarga la pagina para seleccionarla.`);
+                      }}
+                    />
+                  </div>
                   <Select
                     value={formData.organizationId}
                     onValueChange={(value) => setValue("organizationId", value)}

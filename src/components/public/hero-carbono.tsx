@@ -27,15 +27,20 @@ export function HeroCarbono({ metrics, isLoading }: HeroCarbonoProps) {
       <div className="container mx-auto px-4">
         <div className="text-center space-y-6 mb-12">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-            Bolivia protege{" "}
+            Proyectos protegen{" "}
             <span className="text-green-600">
               {isLoading || !metrics
                 ? "..."
-                : `${(metrics.summary.totalHectares / 1_000_000).toFixed(2)} millones`}
+                : `${(metrics.summary.totalHectares / 1000).toLocaleString("es-BO", {
+                    maximumFractionDigits: 0,
+                  })}K`}
             </span>
             <br />
-            de hectáreas de bosque
+            hectáreas de bosque
           </h1>
+          <p className="text-sm text-muted-foreground">
+            De un total de 109.8 millones de hectáreas en Bolivia
+          </p>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Plataforma Nacional de Monitoreo de Proyectos de Carbono y
             Deforestación en tiempo real

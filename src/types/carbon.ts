@@ -14,7 +14,7 @@ export interface CarbonCalculationInput {
   projectType: ProjectType;
   forestType: ForestType;
   biomassPerHectare?: number; // From GEE, in tC/ha
-  duration Years?: number; // Project duration for total calculation
+  durationYears?: number; // Project duration for total calculation
 }
 
 /**

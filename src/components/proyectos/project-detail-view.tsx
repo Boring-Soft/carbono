@@ -80,7 +80,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
     window.location.reload();
   };
 
-  const co Benefits = project.coBenefits ? JSON.parse(project.coBenefits) : [];
+  const coBenefits = project.coBenefits ? JSON.parse(project.coBenefits) : [];
 
   return (
     <>
@@ -256,6 +256,84 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
               </CardContent>
             </Card>
 
+            {/* Carbon Calculation Details */}
+            {project.estimatedCo2TonsYear && (
+              <Card className="border-2 border-green-500/20 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Leaf className="h-6 w-6 text-green-600" />
+                    <CardTitle className="text-2xl">Captura de Carbono</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Cálculo estimado basado en metodología IPCC
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Main CO2 Value */}
+                  <div className="text-center p-6 bg-white dark:bg-slate-900 rounded-lg border-2 border-green-200 dark:border-green-800">
+                    <div className="text-sm font-medium text-muted-foreground mb-2">
+                      Captura Anual de CO₂
+                    </div>
+                    <div className="text-5xl font-bold text-green-700 dark:text-green-500">
+                      {project.estimatedCo2TonsYear.toLocaleString("es-BO", {
+                        maximumFractionDigits: 2,
+                      })}
+                    </div>
+                    <div className="text-lg font-medium text-muted-foreground mt-2">
+                      toneladas de CO₂ por año
+                    </div>
+                  </div>
+
+                  {/* Methodology */}
+                  <div className="space-y-3">
+                    <div className="text-sm font-semibold text-green-800 dark:text-green-400">
+                      📊 Metodología de Cálculo
+                    </div>
+                    <div className="grid gap-3 md:grid-cols-2 text-sm">
+                      <div className="p-3 bg-white dark:bg-slate-900 rounded-md border">
+                        <span className="font-medium">Área del proyecto:</span>{" "}
+                        {project.areaHectares.toLocaleString("es-BO", {
+                          maximumFractionDigits: 2,
+                        })}{" "}
+                        ha
+                      </div>
+                      <div className="p-3 bg-white dark:bg-slate-900 rounded-md border">
+                        <span className="font-medium">Tipo de proyecto:</span>{" "}
+                        {TYPE_LABELS[project.type]}
+                      </div>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-900 rounded-md border text-sm">
+                      <div className="font-medium mb-1">Fuente de datos:</div>
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>
+                          <strong>Factores IPCC</strong> (Intergovernmental Panel on Climate
+                          Change) - Estándares internacionales de biomasa forestal
+                        </li>
+                        <li>
+                          <strong>Tasas de secuestro</strong> según tipo de ecosistema boliviano
+                          (Amazonía, Chiquitanía, Yungas, Altiplano)
+                        </li>
+                        <li>
+                          <strong>Factor de conversión:</strong> 3.67 tCO₂ por tonelada de
+                          carbono (C → CO₂)
+                        </li>
+                      </ul>
+                    </div>
+                    {project.geeVerified && (
+                      <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200 dark:border-blue-800 text-sm">
+                        <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                          <span className="font-medium">✓ Verificado con Google Earth Engine</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Cobertura forestal confirmada mediante análisis satelital
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Revenue Estimate */}
             {project.estimatedCo2TonsYear && (
               <Card>
@@ -362,7 +440,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                           Cobertura Forestal
                         </div>
                         <div className="text-2xl font-bold">
-                          {project.forestCoveragePercent?.toFixed(1)}%
+                          {project.forestCoveragePercent ? Number(project.forestCoveragePercent).toFixed(1) : '-'}%
                         </div>
                       </div>
                       <div>

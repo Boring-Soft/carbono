@@ -304,22 +304,22 @@
   - [x] 7.9 Crear `src/components/reportes/report-history-table.tsx` - Tabla con @tanstack/react-table, columnas: Tipo, Título, Formato, Tamaño, Fecha, Usuario, Acciones (Descargar, Eliminar), paginación, confirmación de eliminación
   - [x] 7.10 Generación asíncrona para reportes grandes - Implementado `src/lib/reports/async-generator.ts` con queueReportGeneration(), generateReportAsync(), soporte para async mode en API route, estado "processing" en DB
 
-- [ ] **8.0 Sistema de Gestión de Organizaciones**
-  - [ ] 8.1 Crear tipos TypeScript en `src/types/organization.ts` (OrganizationType, CreateOrganizationInput, OrganizationWithProjects)
-  - [ ] 8.2 Crear schemas de validación Zod en `src/lib/validations/organization.ts` (createOrganizationSchema, updateOrganizationSchema)
-  - [ ] 8.3 Crear `src/app/api/organizations/route.ts`:
-    - [ ] 8.3.1 GET: Lista de organizaciones con paginación, búsqueda por nombre, filtro por tipo
-    - [ ] 8.3.2 POST: Crear organización - validar con Zod, guardar en DB
-  - [ ] 8.4 Crear `src/app/api/organizations/[id]/route.ts`:
-    - [ ] 8.4.1 GET: Detalle de organización con proyectos relacionados, métricas agregadas (total hectáreas, total CO₂)
-    - [ ] 8.4.2 PATCH: Actualizar organización
-    - [ ] 8.4.3 DELETE: Soft delete (solo si no tiene proyectos activos)
-  - [ ] 8.5 Crear página `src/app/(dashboard)/organizaciones/page.tsx` con lista de organizaciones
-  - [ ] 8.6 Crear página `src/app/(dashboard)/organizaciones/[id]/page.tsx` con detalle y lista de proyectos de la organización
-  - [ ] 8.7 Crear `src/components/organizaciones/organization-form.tsx` - Formulario con react-hook-form para crear/editar organización (campos: nombre, tipo, email, teléfono, dirección)
-  - [ ] 8.8 Crear `src/components/organizaciones/organization-card.tsx` - Card que muestra: nombre, tipo, número de proyectos, métricas agregadas (hectáreas, CO₂), link a detalle
-  - [ ] 8.9 Implementar creación inline de organización en el formulario de proyecto (modal o drawer que se abre desde el select de organización)
-  - [ ] 8.10 Agregar validación: no permitir eliminar organización si tiene proyectos en estado CERTIFIED o ACTIVE
+- [x] **8.0 Sistema de Gestión de Organizaciones**
+  - [x] 8.1 Crear tipos TypeScript en `src/types/organization.ts` (OrganizationType, CreateOrganizationInput, OrganizationWithProjects)
+  - [x] 8.2 Crear schemas de validación Zod en `src/lib/validations/organization.ts` (createOrganizationSchema, updateOrganizationSchema)
+  - [x] 8.3 Crear `src/app/api/organizations/route.ts`:
+    - [x] 8.3.1 GET: Lista de organizaciones con paginación, búsqueda por nombre, filtro por tipo
+    - [x] 8.3.2 POST: Crear organización - validar con Zod, guardar en DB
+  - [x] 8.4 Crear `src/app/api/organizations/[id]/route.ts`:
+    - [x] 8.4.1 GET: Detalle de organización con proyectos relacionados, métricas agregadas (total hectáreas, total CO₂)
+    - [x] 8.4.2 PATCH: Actualizar organización
+    - [x] 8.4.3 DELETE: Soft delete (solo si no tiene proyectos activos)
+  - [x] 8.5 Crear página `src/app/(dashboard)/organizaciones/page.tsx` con lista de organizaciones
+  - [x] 8.6 Crear página `src/app/(dashboard)/organizaciones/[id]/page.tsx` con detalle y lista de proyectos de la organización
+  - [x] 8.7 Crear `src/components/organizaciones/organization-form.tsx` - Formulario con react-hook-form para crear/editar organización (campos: nombre, tipo, email, teléfono, dirección)
+  - [x] 8.8 Crear `src/components/organizaciones/organization-card.tsx` - Card que muestra: nombre, tipo, número de proyectos, métricas agregadas (hectáreas, CO₂), link a detalle
+  - [x] 8.9 Implementar creación inline de organización en el formulario de proyecto (modal o drawer que se abre desde el select de organización)
+  - [x] 8.10 Agregar validación: no permitir eliminar organización si tiene proyectos en estado CERTIFIED o ACTIVE
 
 - [ ] **9.0 Notificaciones y Mejoras de Experiencia de Usuario**
   - [ ] 9.1 Crear tipos TypeScript en `src/types/notification.ts` (NotificationType, NotificationWithLink)
@@ -333,21 +333,21 @@
     - [ ] 9.6.1 Cuando proyecto pasa a estado CERTIFIED
     - [ ] 9.6.2 Cuando alerta de alta severidad está cerca de proyecto
     - [ ] 9.6.3 Cuando se detecta pérdida de cobertura forestal >15% en proyecto activo
-  - [ ] 9.7 Actualizar `src/components/sidebar/app-sidebar.tsx` - Agregar nuevas rutas: Dashboard Carbono, Proyectos, Alertas, Organizaciones, Reportes
+  - [x] 9.7 Actualizar `src/components/sidebar/app-sidebar.tsx` - Agregar nuevas rutas: Dashboard Carbono, Proyectos, Alertas, Organizaciones, Reportes
   - [ ] 9.8 Crear breadcrumbs component para navegación contextual en páginas internas
   - [ ] 9.9 Implementar loading states con Skeleton components de shadcn/ui en todas las páginas
-  - [ ] 9.10 Implementar error boundaries para manejo de errores graceful
+  - [x] 9.10 Implementar error boundaries para manejo de errores graceful
   - [ ] 9.11 Agregar tooltips informativos en campos complejos del formulario de proyecto
-  - [ ] 9.12 Implementar confirmaciones antes de acciones destructivas (eliminar proyecto, eliminar organización)
+  - [x] 9.12 Implementar confirmaciones antes de acciones destructivas (eliminar proyecto, eliminar organización)
 
 - [ ] **10.0 Testing, Optimización y Deployment**
-  - [ ] 10.1 Crear `prisma/seed.ts` con datos de prueba:
-    - [ ] 10.1.1 15+ proyectos realistas distribuidos en los 9 departamentos de Bolivia
-    - [ ] 10.1.2 10+ organizaciones de diferentes tipos (Comunidad Indígena, ONG, Gobierno Local)
-    - [ ] 10.1.3 20+ alertas de deforestación con diferentes severidades y estados
-    - [ ] 10.1.4 Historial de cambios de estado para algunos proyectos
-    - [ ] 10.1.5 Documentos de ejemplo (usar URLs públicas o placeholders)
-  - [ ] 10.2 Ejecutar `npx prisma db seed` para poblar la base de datos
+  - [x] 10.1 Crear `prisma/seed.ts` con datos de prueba:
+    - [x] 10.1.1 15+ proyectos realistas distribuidos en los 9 departamentos de Bolivia
+    - [x] 10.1.2 10+ organizaciones de diferentes tipos (Comunidad Indígena, ONG, Gobierno Local)
+    - [x] 10.1.3 20+ alertas de deforestación con diferentes severidades y estados
+    - [x] 10.1.4 Historial de cambios de estado para algunos proyectos
+    - [ ] 10.1.5 Documentos de ejemplo (usar URLs públicas o placeholders) - No implementado (opcional)
+  - [x] 10.2 Ejecutar `npx prisma db seed` para poblar la base de datos
   - [ ] 10.3 Crear tests unitarios para funciones críticas:
     - [ ] 10.3.1 `src/lib/carbon/__tests__/calculator.test.ts` - Tests de calculadora de carbono con diferentes inputs
     - [ ] 10.3.2 `src/lib/geo/__tests__/turf-utils.test.ts` - Tests de cálculo de área, distancia, validación de polígonos
