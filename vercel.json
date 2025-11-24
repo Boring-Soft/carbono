@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/fetch-nasa-firms",
+      "schedule": "0 */3 * * *"
+    }
+  ]
+}

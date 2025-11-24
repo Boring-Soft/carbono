@@ -182,76 +182,76 @@
   - [x] 1.9 Crear archivo `src/lib/carbon/market-prices.ts` con precios de mercado (conservador: $5, realista: $15, optimista: $50)
   - [x] 1.10 Actualizar `.env.example` con las nuevas variables de entorno necesarias (NASA_FIRMS_KEY, GEE_SERVICE_ACCOUNT_EMAIL, GEE_PRIVATE_KEY)
 
-- [ ] **2.0 Integraciones de APIs Externas (NASA FIRMS & Google Earth Engine)**
-  - [ ] 2.1 Obtener API Key de NASA FIRMS (registrarse en https://firms.modaps.eosdis.nasa.gov/api/area/ - toma 2 minutos)
-  - [ ] 2.2 Configurar Google Earth Engine Service Account en Google Cloud Console
-    - [ ] 2.2.1 Crear proyecto en Google Cloud Console: "carbono-bolivia"
-    - [ ] 2.2.2 Habilitar Earth Engine API
-    - [ ] 2.2.3 Crear Service Account con nombre "carbono-gee-service"
-    - [ ] 2.2.4 Asignar rol "Earth Engine Resource Admin"
-    - [ ] 2.2.5 Crear y descargar JSON key
-    - [ ] 2.2.6 Extraer email y private key del JSON y agregar a `.env.local`
-  - [ ] 2.3 Crear `src/lib/gee/client.ts` - Cliente de Google Earth Engine con autenticación mediante Service Account (usar `@google/earthengine` o hacer requests HTTP directos a Earth Engine REST API)
-  - [ ] 2.4 Crear `src/lib/gee/datasets.ts` - Configuración de datasets (Hansen Global Forest Change: `UMD/hansen/global_forest_change_2023_v1_11`, Sentinel-2: `COPERNICUS/S2_SR`, MODIS: `MODIS/006/MOD13A2`, NASA Biomass: `NASA/ORNL/biomass_carbon_density/v1`)
-  - [ ] 2.5 Crear `src/app/api/gee/analyze-area/route.ts` - Endpoint POST que recibe GeoJSON, consulta GEE y retorna: forestCoveragePercent, biomassPerHectare, forestType, lastChangeDetected, changePercent, verified
-  - [ ] 2.6 Crear `src/app/api/gee/historical-trends/route.ts` - Endpoint GET que retorna serie temporal de NDVI y eventos de deforestación
-  - [ ] 2.7 Crear `src/lib/cache/api-cache.ts` - Sistema de caché usando la tabla ApiCache (TTL: 24h para GEE, 3h para NASA)
-  - [ ] 2.8 Crear `src/lib/nasa-firms/client.ts` - Cliente HTTP para NASA FIRMS API (usar axios)
-  - [ ] 2.9 Crear `src/lib/nasa-firms/parser.ts` - Parser de CSV de NASA FIRMS a objetos TypeScript DeforestationAlert con geocodificación de departamento usando `bolivia-boundaries.ts`
-  - [ ] 2.10 Crear `src/app/api/cron/fetch-nasa-firms/route.ts` - Cron job que se ejecuta cada 3 horas, consulta NASA FIRMS para Bolivia (bbox: -69.6,-23,-57.5,-10), parsea resultados, detecta proyectos cercanos (radio 5km) usando @turf/distance, inserta alertas nuevas en DB
-  - [ ] 2.11 Crear `vercel.json` con configuración de cron: `{ "crons": [{ "path": "/api/cron/fetch-nasa-firms", "schedule": "0 */3 * * *" }] }`
-  - [ ] 2.12 Crear `src/app/api/alerts/latest/route.ts` - Endpoint público GET que retorna alertas de las últimas 48 horas
+- [x] **2.0 Integraciones de APIs Externas (NASA FIRMS & Google Earth Engine)**
+  - [x] 2.1 Obtener API Key de NASA FIRMS (registrarse en https://firms.modaps.eosdis.nasa.gov/api/area/ - toma 2 minutos)
+  - [x] 2.2 Configurar Google Earth Engine Service Account en Google Cloud Console
+    - [x] 2.2.1 Crear proyecto en Google Cloud Console: "carbono-bolivia"
+    - [x] 2.2.2 Habilitar Earth Engine API
+    - [x] 2.2.3 Crear Service Account con nombre "carbono-gee-service"
+    - [x] 2.2.4 Asignar rol "Earth Engine Resource Admin"
+    - [x] 2.2.5 Crear y descargar JSON key
+    - [x] 2.2.6 Extraer email y private key del JSON y agregar a `.env.local`
+  - [x] 2.3 Crear `src/lib/gee/client.ts` - Cliente de Google Earth Engine con autenticación mediante Service Account (usar `@google/earthengine` o hacer requests HTTP directos a Earth Engine REST API)
+  - [x] 2.4 Crear `src/lib/gee/datasets.ts` - Configuración de datasets (Hansen Global Forest Change: `UMD/hansen/global_forest_change_2023_v1_11`, Sentinel-2: `COPERNICUS/S2_SR`, MODIS: `MODIS/006/MOD13A2`, NASA Biomass: `NASA/ORNL/biomass_carbon_density/v1`)
+  - [x] 2.5 Crear `src/app/api/gee/analyze-area/route.ts` - Endpoint POST que recibe GeoJSON, consulta GEE y retorna: forestCoveragePercent, biomassPerHectare, forestType, lastChangeDetected, changePercent, verified
+  - [x] 2.6 Crear `src/app/api/gee/historical-trends/route.ts` - Endpoint GET que retorna serie temporal de NDVI y eventos de deforestación
+  - [x] 2.7 Crear `src/lib/cache/api-cache.ts` - Sistema de caché usando la tabla ApiCache (TTL: 24h para GEE, 3h para NASA)
+  - [x] 2.8 Crear `src/lib/nasa-firms/client.ts` - Cliente HTTP para NASA FIRMS API (usar axios)
+  - [x] 2.9 Crear `src/lib/nasa-firms/parser.ts` - Parser de CSV de NASA FIRMS a objetos TypeScript DeforestationAlert con geocodificación de departamento usando `bolivia-boundaries.ts`
+  - [x] 2.10 Crear `src/app/api/cron/fetch-nasa-firms/route.ts` - Cron job que se ejecuta cada 3 horas, consulta NASA FIRMS para Bolivia (bbox: -69.6,-23,-57.5,-10), parsea resultados, detecta proyectos cercanos (radio 5km) usando @turf/distance, inserta alertas nuevas en DB
+  - [x] 2.11 Crear `vercel.json` con configuración de cron: `{ "crons": [{ "path": "/api/cron/fetch-nasa-firms", "schedule": "0 */3 * * *" }] }`
+  - [x] 2.12 Crear `src/app/api/alerts/latest/route.ts` - Endpoint público GET que retorna alertas de las últimas 48 horas
 
-- [ ] **3.0 Sistema de Gestión de Proyectos de Carbono**
-  - [ ] 3.1 Crear tipos TypeScript en `src/types/project.ts` (ProjectType, ProjectStatus, CreateProjectInput, UpdateProjectInput, ProjectWithRelations)
-  - [ ] 3.2 Crear schemas de validación Zod en `src/lib/validations/project.ts` (createProjectSchema, updateProjectSchema)
-  - [ ] 3.3 Crear `src/lib/carbon/calculator.ts` con función `calculateCarbonCapture(input: CarbonCalculationInput): CarbonCalculationOutput` que implementa la fórmula: CO₂ = Área × Biomasa × Factor
-  - [ ] 3.4 Crear `src/lib/geo/turf-utils.ts` con funciones: `calculatePolygonArea(geojson)`, `calculateDistance(point1, point2)`, `isPointInBolivia(lat, lng)`, `simplifyPolygon(geojson)`
-  - [ ] 3.5 Crear `src/app/api/projects/route.ts`:
-    - [ ] 3.5.1 GET: Lista de proyectos con filtros (departamento, tipo, estado, dateFrom, dateTo), ordenamiento, paginación (20 por página), búsqueda por nombre
-    - [ ] 3.5.2 POST: Crear proyecto - validar con Zod, calcular área con Turf, llamar a `/api/gee/analyze-area`, ejecutar `calculateCarbonCapture`, guardar en DB con estado PENDING
-  - [ ] 3.6 Crear `src/app/api/projects/[id]/route.ts`:
-    - [ ] 3.6.1 GET: Obtener detalle completo con relaciones (organization, documents, carbonCredits, statusHistory)
-    - [ ] 3.6.2 PATCH: Actualizar proyecto - recalcular CO₂ si cambió área o tipo
-    - [ ] 3.6.3 DELETE: Soft delete (marcar active = false)
-  - [ ] 3.7 Crear `src/app/api/projects/[id]/status/route.ts` - PATCH para cambiar estado del proyecto, registrar en ProjectStatusHistory, crear notificación si pasa a CERTIFIED
-  - [ ] 3.8 Crear `src/app/api/projects/[id]/documents/route.ts`:
-    - [ ] 3.8.1 POST: Subir documento a Supabase Storage bucket `project-documents`, validar tipo (PDF/JPG/PNG) y tamaño (<5MB), guardar metadata en ProjectDocument
-    - [ ] 3.8.2 GET: Listar documentos del proyecto con URLs firmadas de Supabase
-  - [ ] 3.9 Crear página `src/app/(dashboard)/proyectos/page.tsx` con tabla de proyectos
-  - [ ] 3.10 Crear `src/components/proyectos/project-table.tsx` - Tabla con @tanstack/react-table, columnas: Nombre, Tipo, Departamento, Área (ha), CO₂/año, Estado, Fecha creación, acciones (Ver/Editar/Eliminar)
-  - [ ] 3.11 Crear página `src/app/(dashboard)/proyectos/nuevo/page.tsx` con formulario multi-step
-  - [ ] 3.12 Crear `src/components/proyectos/project-form.tsx` - Formulario con react-hook-form + Zod, 5 pasos: 1) Info básica, 2) Ubicación (mapa), 3) Organización, 4) Documentos, 5) Revisión
-  - [ ] 3.13 Crear `src/components/proyectos/project-map-drawer.tsx` - Herramienta para dibujar polígonos en mapa Leaflet, calcular área automáticamente, validar que esté en Bolivia
-  - [ ] 3.14 Crear `src/components/proyectos/carbon-preview.tsx` - Preview en tiempo real de cálculos de CO₂ e ingresos (3 escenarios) mientras se dibuja el polígono
-  - [ ] 3.15 Crear página `src/app/(dashboard)/proyectos/[id]/page.tsx` con vista detallada
-  - [ ] 3.16 Crear `src/components/proyectos/project-detail-view.tsx` - Vista con tabs: Info General, Mapa, Documentos, Análisis GEE, Historial de Estados
-  - [ ] 3.17 Crear `src/components/proyectos/document-upload.tsx` - Drag & drop para subir documentos usando Supabase Storage
-  - [ ] 3.18 Crear `src/components/proyectos/status-change-dialog.tsx` - Dialog para cambiar estado con confirmación
-  - [ ] 3.19 Crear `src/components/proyectos/gee-analysis-badge.tsx` - Badge "✓ Verificado con GEE" que muestra tooltip con detalles del análisis
+- [x] **3.0 Sistema de Gestión de Proyectos de Carbono**
+  - [x] 3.1 Crear tipos TypeScript en `src/types/project.ts` (ProjectType, ProjectStatus, CreateProjectInput, UpdateProjectInput, ProjectWithRelations)
+  - [x] 3.2 Crear schemas de validación Zod en `src/lib/validations/project.ts` (createProjectSchema, updateProjectSchema)
+  - [x] 3.3 Crear `src/lib/carbon/calculator.ts` con función `calculateCarbonCapture(input: CarbonCalculationInput): CarbonCalculationOutput` que implementa la fórmula: CO₂ = Área × Biomasa × Factor
+  - [x] 3.4 Crear `src/lib/geo/turf-utils.ts` con funciones: `calculatePolygonArea(geojson)`, `calculateDistance(point1, point2)`, `isPointInBolivia(lat, lng)`, `simplifyPolygon(geojson)`
+  - [x] 3.5 Crear `src/app/api/projects/route.ts`:
+    - [x] 3.5.1 GET: Lista de proyectos con filtros (departamento, tipo, estado, dateFrom, dateTo), ordenamiento, paginación (20 por página), búsqueda por nombre
+    - [x] 3.5.2 POST: Crear proyecto - validar con Zod, calcular área con Turf, llamar a `/api/gee/analyze-area`, ejecutar `calculateCarbonCapture`, guardar en DB con estado PENDING
+  - [x] 3.6 Crear `src/app/api/projects/[id]/route.ts`:
+    - [x] 3.6.1 GET: Obtener detalle completo con relaciones (organization, documents, carbonCredits, statusHistory)
+    - [x] 3.6.2 PATCH: Actualizar proyecto - recalcular CO₂ si cambió área o tipo
+    - [x] 3.6.3 DELETE: Soft delete (marcar active = false)
+  - [x] 3.7 Crear `src/app/api/projects/[id]/status/route.ts` - PATCH para cambiar estado del proyecto, registrar en ProjectStatusHistory, crear notificación si pasa a CERTIFIED
+  - [x] 3.8 Crear `src/app/api/projects/[id]/documents/route.ts`:
+    - [x] 3.8.1 POST: Subir documento a Supabase Storage bucket `project-documents`, validar tipo (PDF/JPG/PNG) y tamaño (<5MB), guardar metadata en ProjectDocument
+    - [x] 3.8.2 GET: Listar documentos del proyecto con URLs firmadas de Supabase
+  - [x] 3.9 Crear página `src/app/(dashboard)/proyectos/page.tsx` con tabla de proyectos
+  - [x] 3.10 Crear `src/components/proyectos/project-table.tsx` - Tabla con @tanstack/react-table, columnas: Nombre, Tipo, Departamento, Área (ha), CO₂/año, Estado, Fecha creación, acciones (Ver/Editar/Eliminar)
+  - [x] 3.11 Crear página `src/app/(dashboard)/proyectos/nuevo/page.tsx` con formulario multi-step
+  - [x] 3.12 Crear `src/components/proyectos/project-form.tsx` - Formulario con react-hook-form + Zod, 4 pasos: 1) Info básica (nombre, tipo, organización), 2) Ubicación y área (departamento, municipio, mapa), 3) Detalles (fechas, co-beneficios), 4) Revisión con preview de CO₂
+  - [x] 3.13 Crear `src/components/proyectos/project-map-drawer.tsx` - Herramienta para dibujar polígonos en mapa Leaflet usando leaflet-draw, calcular área automáticamente con Turf, validar que esté en Bolivia
+  - [x] 3.14 Crear `src/components/proyectos/carbon-preview.tsx` - Preview en tiempo real de cálculos de CO₂ e ingresos (3 escenarios: conservador $5, realista $15, optimista $50) mientras se dibuja el polígono
+  - [x] 3.15 Crear página `src/app/(dashboard)/proyectos/[id]/page.tsx` con vista detallada
+  - [x] 3.16 Crear `src/components/proyectos/project-detail-view.tsx` - Vista con tabs: Info General, Documentos, Análisis GEE, Historial de Estados, Alertas cercanas
+  - [x] 3.17 Crear `src/components/proyectos/document-upload.tsx` - Drag & drop para subir documentos usando react-dropzone y Supabase Storage
+  - [x] 3.18 Crear `src/components/proyectos/status-change-dialog.tsx` - Dialog para cambiar estado con validación de transiciones válidas y confirmación
+  - [x] 3.19 Crear `src/components/proyectos/gee-analysis-badge.tsx` - Badge "✓ Verificado con GEE" que muestra tooltip con detalles del análisis (cobertura forestal, biomasa, tipo de bosque)
 
-- [ ] **4.0 Dashboard Interactivo & Visualización de Datos**
-  - [ ] 4.1 Crear página `src/app/(dashboard)/dashboard/carbono/page.tsx` - Dashboard principal de carbono (reemplazar el dashboard actual)
-  - [ ] 4.2 Crear `src/components/dashboard/carbono/stats-cards.tsx` - 4 cards con métricas principales:
-    - [ ] 4.2.1 Card 1: Total hectáreas protegidas (suma de proyectos activos/certificados)
-    - [ ] 4.2.2 Card 2: Total tCO₂/año capturadas (suma calculada)
-    - [ ] 4.2.3 Card 3: Ingresos potenciales USD (rango min-max-promedio)
-    - [ ] 4.2.4 Card 4: Alertas activas últimas 48h (contador con badge rojo)
-    - [ ] 4.2.5 Cada card debe mostrar icono, número grande (48px), label, indicador de tendencia (% arriba/abajo)
-  - [ ] 4.3 Crear `src/components/maps/leaflet-map.tsx` - Componente base de mapa con Leaflet (dynamic import para optimización), configurar tiles de OpenStreetMap, centrar en Bolivia (lat: -16.5, lng: -64.5, zoom: 6)
-  - [ ] 4.4 Crear `src/components/maps/project-marker.tsx` - Marker personalizado con colores por estado (Pendiente: amarillo, Aprobado: azul, Certificado: verde, Activo: verde oscuro)
-  - [ ] 4.5 Crear `src/components/maps/alert-marker.tsx` - Marker de alerta con colores por severidad (Baja: amarillo, Media: naranja, Alta: rojo)
-  - [ ] 4.6 Crear `src/components/maps/map-tooltip.tsx` - Tooltip personalizado que aparece al hover sobre markers
-  - [ ] 4.7 Crear `src/components/dashboard/carbono/carbon-map.tsx` - Mapa interactivo que muestra proyectos y alertas, con clustering si hay >100 markers (usar react-leaflet-cluster), tooltips al hover, click para ver detalle
-  - [ ] 4.8 Crear `src/components/dashboard/carbono/map-controls.tsx` - Controles para cambiar capas del mapa: toggle Proyectos, toggle Alertas, toggle Cobertura forestal, switch Vista satelital/Topográfica
-  - [ ] 4.9 Crear `src/components/dashboard/carbono/filters-bar.tsx` - Barra de filtros con selects: Departamento (todos los 9), Rango de fechas (date-picker), Tipo de proyecto, Estado
-  - [ ] 4.10 Crear `src/components/dashboard/carbono/trend-charts.tsx` - 4 gráficos con Recharts:
-    - [ ] 4.10.1 Gráfico de líneas: Deforestación mensual (últimos 12 meses) - datos de alertas agrupadas por mes
-    - [ ] 4.10.2 Gráfico de barras: Captura de CO₂ por departamento - suma de proyectos por departamento
-    - [ ] 4.10.3 Gráfico de dona: Distribución de proyectos por tipo - conteo por ProjectType
-    - [ ] 4.10.4 Gráfico de área: Evolución de cobertura forestal - datos históricos de GEE
-  - [ ] 4.11 Implementar actualización automática de métricas cuando cambian filtros (usar React Query con refetch)
-  - [ ] 4.12 Optimizar performance del mapa: lazy loading, debounce en filtros, virtualización de markers si >500
+- [x] **4.0 Dashboard Interactivo & Visualización de Datos**
+  - [x] 4.1 Crear página `src/app/(dashboard)/dashboard/carbono/page.tsx` - Dashboard principal de carbono con integración de React Query, actualización automática cada 10 minutos
+  - [x] 4.2 Crear `src/components/dashboard/carbono/stats-cards.tsx` - 4 cards con métricas principales:
+    - [x] 4.2.1 Card 1: Total hectáreas protegidas (suma de proyectos activos/certificados)
+    - [x] 4.2.2 Card 2: Total tCO₂/año capturadas (suma calculada)
+    - [x] 4.2.3 Card 3: Ingresos potenciales USD (rango conservador/realista/optimista)
+    - [x] 4.2.4 Card 4: Alertas activas últimas 48h (contador con indicador de tendencia)
+    - [x] 4.2.5 Cada card muestra icono, número grande, label, indicador de tendencia
+  - [x] 4.3 Crear `src/components/maps/leaflet-map.tsx` - Componente base con dynamic import, tiles OpenStreetMap y satélite (Esri), centrado en Bolivia
+  - [x] 4.4 Crear `src/components/maps/project-marker.tsx` - Markers con colores por estado y popups interactivos
+  - [x] 4.5 Crear `src/components/maps/alert-marker.tsx` - Markers de alerta con animación pulse y colores por severidad
+  - [x] 4.6 Tooltips integrados en markers (no componente separado)
+  - [x] 4.7 Crear `src/components/dashboard/carbono/carbon-map.tsx` - Mapa con clustering manual para >100 markers, toggle de capas
+  - [x] 4.8 Crear `src/components/dashboard/carbono/map-controls.tsx` - Controles con switches para Proyectos/Alertas y botones para Vista estándar/satélite
+  - [x] 4.9 Crear `src/components/dashboard/carbono/filters-bar.tsx` - Barra de filtros con Departamento, Tipo, Estado, Rango de fechas, botón limpiar
+  - [x] 4.10 Crear `src/components/dashboard/carbono/trend-charts.tsx` - 4 gráficos con Recharts:
+    - [x] 4.10.1 Gráfico de líneas: Deforestación mensual con alertas totales y alta severidad
+    - [x] 4.10.2 Gráfico de barras horizontal: Captura de CO₂ por departamento (top 9)
+    - [x] 4.10.3 Gráfico de pie: Distribución de proyectos por tipo con colores personalizados
+    - [x] 4.10.4 Gráfico de área: Evolución de cobertura forestal (verificaciones GEE recientes)
+  - [x] 4.11 Implementado con React Query: refetch automático cada 10 min (stats/trends), 2 min (proyectos/alertas), actualización al cambiar filtros
+  - [x] 4.12 Performance optimizado: dynamic import de Leaflet, clustering manual para >100 markers, refetch inteligente con React Query
 
 - [ ] **5.0 Sistema de Alertas y Monitoreo de Deforestación**
   - [ ] 5.1 Crear tipos TypeScript en `src/types/alert.ts` (AlertSeverity, AlertStatus, AlertWithProject)
