@@ -3,7 +3,7 @@
  * Types for organization management
  */
 
-import { OrganizationType } from '@prisma/client';
+export type OrganizationType = "Community" | "NGO" | "Government" | "Private";
 
 /**
  * Base organization data

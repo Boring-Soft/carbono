@@ -1,4 +1,4 @@
-import { DeforestationAlert, Project } from "@prisma/client";
+import { DeforestationAlert } from "@prisma/client";
 
 // Alert severity enum (matches Prisma schema)
 export type AlertSeverity = "LOW" | "MEDIUM" | "HIGH";

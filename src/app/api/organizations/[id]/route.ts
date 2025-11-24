@@ -16,10 +16,10 @@ import { ProjectStatus } from '@prisma/client';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Get organization with projects
     const organization = await prisma.organization.findUnique({
@@ -55,9 +55,9 @@ export async function GET(
     // Calculate metrics
     const metrics = {
       totalProjects: organization.projects.length,
-      totalHectares: organization.projects.reduce((sum, p) => sum + p.areaHectares, 0),
+      totalHectares: organization.projects.reduce((sum, p) => sum + Number(p.areaHectares), 0),
       totalCo2Year: organization.projects.reduce(
-        (sum, p) => sum + (p.estimatedCo2TonsYear || 0),
+        (sum, p) => sum + Number(p.estimatedCo2TonsYear || 0),
         0
       ),
       activeProjects: organization.projects.filter(
@@ -94,10 +94,10 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     // Validate input
@@ -174,10 +174,10 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Check if organization exists and get project count
     const organization = await prisma.organization.findUnique({

@@ -25,7 +25,7 @@ interface GeneratedReport {
   fileSizeKb: number | null;
   generatedBy: string | null;
   generatedAt: Date;
-  parameters: any;
+  parameters: Record<string, unknown>;
   status: string;
 }
 

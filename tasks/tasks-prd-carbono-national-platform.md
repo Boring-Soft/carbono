@@ -388,6 +388,161 @@
     - [ ] 10.12.3 Verificar que las llamadas a GEE funcionen en producción
     - [ ] 10.12.4 Configurar monitoring y alertas (Vercel o Sentry)
 
+- [ ] **11.0 Módulo de Cálculo de Emisiones Industriales (Fábricas y Empresas)**
+  - [ ] 11.1 Actualizar schema de base de datos:
+    - [ ] 11.1.1 Agregar modelo `Industry` a `prisma/schema.prisma` (id, name, type, sector, address, city, department, organizationId, active, createdAt, updatedAt, createdBy)
+    - [ ] 11.1.2 Agregar enum `IndustrySector` (MANUFACTURING, CEMENT, STEEL, TEXTILES, FOOD_BEVERAGE, CHEMICALS, MINING, ENERGY, CONSTRUCTION, OTHER)
+    - [ ] 11.1.3 Agregar modelo `EmissionSource` (id, industryId, sourceType, category, scope, description, active, createdAt, updatedAt)
+    - [ ] 11.1.4 Agregar enum `EmissionScope` (SCOPE_1, SCOPE_2, SCOPE_3) según GHG Protocol
+    - [ ] 11.1.5 Agregar enum `SourceCategory` (STATIONARY_COMBUSTION, MOBILE_COMBUSTION, PROCESS_EMISSIONS, FUGITIVE_EMISSIONS, PURCHASED_ELECTRICITY, PURCHASED_HEAT_STEAM, TRANSPORTATION, WASTE)
+    - [ ] 11.1.6 Agregar modelo `EmissionRecord` (id, sourceId, recordDate, fuelType, fuelAmount, fuelUnit, activityData, emissionFactor, co2Emissions, ch4Emissions, n2oEmissions, totalCO2e, calculationMethod, notes, verified, verifiedBy, verifiedAt, createdAt, updatedAt, createdBy)
+    - [ ] 11.1.7 Agregar enum `FuelType` (DIESEL, GASOLINE, NATURAL_GAS, LPG, COAL, BIOMASS, ELECTRICITY, OTHER)
+    - [ ] 11.1.8 Agregar modelo `IndustryInventory` (id, industryId, year, scope1Total, scope2Total, scope3Total, totalEmissions, status, reportedAt, verifiedAt, pdfUrl, createdAt, updatedAt)
+    - [ ] 11.1.9 Ejecutar migración: `npx prisma migrate dev --name add_industrial_emissions`
+  - [ ] 11.2 Crear factores de emisión y constantes:
+    - [ ] 11.2.1 Crear `src/lib/emissions/emission-factors.ts` con factores IPCC 2006:
+      - [ ] 11.2.1.1 Factores para combustibles (diesel: 2.68 kgCO2/L, gasolina: 2.31 kgCO2/L, gas natural: 2.03 kgCO2/m³, GLP: 1.51 kgCO2/kg, carbón: 2.42 kgCO2/kg)
+      - [ ] 11.2.1.2 Factor de electricidad Bolivia: 0.42 tonCO2/MWh (actualizable por año)
+      - [ ] 11.2.1.3 Factores para procesos industriales (cemento: 0.52 tonCO2/ton clinker, acero: 1.8 tonCO2/ton acero, cal: 0.75 tonCO2/ton cal)
+      - [ ] 11.2.1.4 Factores de GWP (Global Warming Potential): CH4=25, N2O=298, HFCs según tipo
+      - [ ] 11.2.1.5 Constantes de conversión (L a galones, m³ a ft³, kWh a MWh, etc.)
+    - [ ] 11.2.2 Crear `src/lib/emissions/ghg-protocol-scopes.ts` con definiciones y ejemplos de cada alcance según GHG Protocol
+    - [ ] 11.2.3 Crear `src/lib/emissions/industry-baselines.ts` con líneas base por sector industrial en Bolivia (intensidad de emisión promedio: tonCO2e/unidad producción)
+  - [ ] 11.3 Crear calculadora de emisiones industriales:
+    - [ ] 11.3.1 Crear `src/lib/emissions/industrial-calculator.ts` con funciones:
+      - [ ] 11.3.1.1 `calculateScope1Emissions(sources: Scope1Source[]): Scope1Result` - Combustión estacionaria, móvil, procesos, fugitivas
+      - [ ] 11.3.1.2 `calculateScope2Emissions(electricityKWh: number, year: number): Scope2Result` - Electricidad comprada
+      - [ ] 11.3.1.3 `calculateScope3Emissions(activities: Scope3Activity[]): Scope3Result` - Transporte, residuos, viajes de negocio
+      - [ ] 11.3.1.4 `calculateTotalInventory(industry: IndustryData): InventoryResult` - Suma de todos los alcances con desglose
+      - [ ] 11.3.1.5 `convertToTonsCO2e(emissions: GHGEmissions): number` - Convierte todos los GEI a CO₂ equivalente usando GWP
+      - [ ] 11.3.1.6 `calculateIntensity(emissions: number, production: number, unit: string): number` - Intensidad de emisión (tonCO2e/unidad)
+      - [ ] 11.3.1.7 `compareToPreviousYear(current: Inventory, previous: Inventory): ComparisonResult` - Análisis de tendencias
+      - [ ] 11.3.1.8 Implementar validaciones: datos negativos, fechas coherentes, unidades válidas
+  - [ ] 11.4 Crear tipos TypeScript:
+    - [ ] 11.4.1 Crear `src/types/industrial-emissions.ts` con tipos: IndustryType, EmissionScope, SourceCategory, FuelType, EmissionFactor, Scope1Source, Scope2Source, Scope3Activity, EmissionRecord, InventoryResult, ComparisonResult, IndustryWithSources, CalculationMethod
+    - [ ] 11.4.2 Crear schemas de validación Zod en `src/lib/validations/industrial-emissions.ts`: createIndustrySchema, createEmissionSourceSchema, recordEmissionSchema, generateInventorySchema
+  - [ ] 11.5 Crear API routes para industrias:
+    - [ ] 11.5.1 Crear `src/app/api/industries/route.ts`:
+      - [ ] 11.5.1.1 GET: Lista de industrias con filtros (sector, departamento, organización), paginación
+      - [ ] 11.5.1.2 POST: Crear nueva industria - validar con Zod, asociar a organización
+    - [ ] 11.5.2 Crear `src/app/api/industries/[id]/route.ts`:
+      - [ ] 11.5.2.1 GET: Detalle de industria con fuentes de emisión, inventarios, métricas agregadas
+      - [ ] 11.5.2.2 PATCH: Actualizar información de industria
+      - [ ] 11.5.2.3 DELETE: Soft delete (solo si no tiene inventarios certificados)
+    - [ ] 11.5.3 Crear `src/app/api/industries/[id]/sources/route.ts`:
+      - [ ] 11.5.3.1 GET: Lista de fuentes de emisión de la industria por alcance
+      - [ ] 11.5.3.2 POST: Agregar nueva fuente de emisión (combustión estacionaria, móvil, electricidad, etc.)
+    - [ ] 11.5.4 Crear `src/app/api/industries/[id]/sources/[sourceId]/route.ts`:
+      - [ ] 11.5.4.1 PATCH: Actualizar fuente de emisión
+      - [ ] 11.5.4.2 DELETE: Eliminar fuente (solo si no tiene registros)
+  - [ ] 11.6 Crear API routes para registros de emisiones:
+    - [ ] 11.6.1 Crear `src/app/api/emission-records/route.ts`:
+      - [ ] 11.6.1.1 GET: Lista de registros con filtros (industria, fuente, fecha desde/hasta, alcance), ordenamiento, paginación
+      - [ ] 11.6.1.2 POST: Registrar nuevas emisiones - validar datos, calcular emisiones usando industrial-calculator, guardar en DB
+    - [ ] 11.6.2 Crear `src/app/api/emission-records/[id]/route.ts`:
+      - [ ] 11.6.2.1 GET: Detalle de registro con cálculos desglosados
+      - [ ] 11.6.2.2 PATCH: Actualizar registro (recalcular emisiones si cambian datos de actividad)
+      - [ ] 11.6.2.3 DELETE: Eliminar registro (solo si no está en inventario certificado)
+    - [ ] 11.6.3 Crear `src/app/api/emission-records/bulk/route.ts`:
+      - [ ] 11.6.3.1 POST: Importar múltiples registros desde Excel/CSV - parsear, validar, calcular, insertar en batch
+  - [ ] 11.7 Crear API routes para inventarios:
+    - [ ] 11.7.1 Crear `src/app/api/industries/[id]/inventory/route.ts`:
+      - [ ] 11.7.1.1 POST: Generar inventario anual - consultar todos los registros del año, sumar por alcance, calcular totales, generar PDF, guardar en DB y Supabase Storage
+      - [ ] 11.7.1.2 GET: Lista de inventarios generados con filtro por año y estado
+    - [ ] 11.7.2 Crear `src/app/api/inventories/[id]/route.ts`:
+      - [ ] 11.7.2.1 GET: Detalle de inventario con desglose completo, comparación con año anterior, gráficos
+      - [ ] 11.7.2.2 PATCH: Actualizar estado (DRAFT → SUBMITTED → VERIFIED)
+      - [ ] 11.7.2.3 POST verify: Verificar inventario (requiere rol SUPERADMIN)
+    - [ ] 11.7.3 Crear `src/app/api/industries/[id]/inventory/calculate/route.ts`:
+      - [ ] 11.7.3.1 POST: Calcular inventario en tiempo real sin guardarlo (preview para revisar antes de generar oficial)
+  - [ ] 11.8 Crear páginas de gestión de industrias:
+    - [ ] 11.8.1 Crear `src/app/(dashboard)/industrias/page.tsx` - Lista de industrias con filtros y estadísticas agregadas
+    - [ ] 11.8.2 Crear `src/app/(dashboard)/industrias/nueva/page.tsx` - Formulario de registro de nueva industria
+    - [ ] 11.8.3 Crear `src/app/(dashboard)/industrias/[id]/page.tsx` - Dashboard de industria con tabs: Resumen, Fuentes de Emisión, Registros, Inventarios, Configuración
+    - [ ] 11.8.4 Crear `src/app/(dashboard)/industrias/[id]/registrar-emision/page.tsx` - Formulario para registrar emisiones con wizard multi-step
+  - [ ] 11.9 Crear componentes de UI para industrias:
+    - [ ] 11.9.1 Crear `src/components/industrias/industry-form.tsx` - Formulario con react-hook-form + Zod (nombre, sector, ubicación, asociación a organización)
+    - [ ] 11.9.2 Crear `src/components/industrias/industry-card.tsx` - Card con nombre, sector, emisiones totales año actual, tendencia vs. año anterior
+    - [ ] 11.9.3 Crear `src/components/industrias/industry-table.tsx` - Tabla con @tanstack/react-table (columnas: Nombre, Sector, Departamento, Emisiones año actual, Estado inventario, Acciones)
+    - [ ] 11.9.4 Crear `src/components/industrias/emission-source-form.tsx` - Formulario para agregar/editar fuentes de emisión (tipo de fuente, categoría, alcance, descripción)
+    - [ ] 11.9.5 Crear `src/components/industrias/emission-source-list.tsx` - Lista agrupada por alcance con badges de categoría y acciones (editar/eliminar)
+  - [ ] 11.10 Crear componentes de registro de emisiones:
+    - [ ] 11.10.1 Crear `src/components/emisiones/emission-record-form.tsx` - Formulario wizard con 4 pasos:
+      - [ ] 11.10.1.1 Paso 1: Seleccionar fuente de emisión (filtrado por industria y alcance)
+      - [ ] 11.10.1.2 Paso 2: Ingresar datos de actividad (cantidad de combustible, kWh electricidad, km recorridos, etc.) con selector de unidades
+      - [ ] 11.10.1.3 Paso 3: Preview de cálculo (mostrar emisiones CO₂, CH₄, N₂O, total CO₂e, factor de emisión usado, metodología)
+      - [ ] 11.10.1.4 Paso 4: Confirmación y notas adicionales
+    - [ ] 11.10.2 Crear `src/components/emisiones/emission-calculator-widget.tsx` - Widget para calcular emisiones en tiempo real mientras se ingresan datos (mostrar formula: Actividad × Factor = Emisiones)
+    - [ ] 11.10.3 Crear `src/components/emisiones/emission-factor-tooltip.tsx` - Tooltip que explica el factor de emisión usado, fuente (IPCC, DEFRA), fecha de actualización
+    - [ ] 11.10.4 Crear `src/components/emisiones/emission-record-table.tsx` - Tabla de registros con filtros (fecha, fuente, alcance), columnas: Fecha, Fuente, Categoría, Alcance, Actividad, Emisiones CO₂e, Estado, Acciones
+    - [ ] 11.10.5 Crear `src/components/emisiones/bulk-import-dialog.tsx` - Dialog para importar múltiples registros desde Excel (con plantilla descargable, validación de formato, preview de datos a importar)
+  - [ ] 11.11 Crear componentes de inventarios:
+    - [ ] 11.11.1 Crear `src/components/inventarios/inventory-summary-cards.tsx` - 4 cards: Alcance 1, Alcance 2, Alcance 3, Total, con indicadores de tendencia
+    - [ ] 11.11.2 Crear `src/components/inventarios/inventory-breakdown-chart.tsx` - Gráfico de pie mostrando distribución de emisiones por alcance y categoría
+    - [ ] 11.11.3 Crear `src/components/inventarios/emissions-timeline-chart.tsx` - Gráfico de línea con evolución mensual de emisiones (desglosado por alcance)
+    - [ ] 11.11.4 Crear `src/components/inventarios/inventory-comparison-chart.tsx` - Gráfico de barras comparando año actual vs. anterior por alcance
+    - [ ] 11.11.5 Crear `src/components/inventarios/generate-inventory-dialog.tsx` - Dialog para generar inventario anual (selector de año, opciones de formato PDF/Excel, botón generar con loading state)
+    - [ ] 11.11.6 Crear `src/components/inventarios/inventory-status-badge.tsx` - Badge con estados: DRAFT (gray), SUBMITTED (blue), VERIFIED (green)
+    - [ ] 11.11.7 Crear `src/components/inventarios/inventory-verification-form.tsx` - Formulario para verificar inventario (solo SUPERADMIN, campos: notas de verificación, fecha de verificación, firma digital)
+  - [ ] 11.12 Crear generador de reportes de inventario:
+    - [ ] 11.12.1 Crear `src/lib/emissions/reports/inventory-pdf-generator.ts` - Generador de PDF de inventario GEI con jsPDF:
+      - [ ] 11.12.1.1 Portada con logo, nombre de industria, año, fecha de generación
+      - [ ] 11.12.1.2 Resumen ejecutivo: total de emisiones, desglose por alcance, comparación con año anterior, intensidad de emisión
+      - [ ] 11.12.1.3 Sección Alcance 1: tabla de fuentes, gráfico de distribución por categoría
+      - [ ] 11.12.1.4 Sección Alcance 2: consumo de electricidad, factor de emisión usado, total de emisiones
+      - [ ] 11.12.1.5 Sección Alcance 3: actividades incluidas, metodología, total de emisiones
+      - [ ] 11.12.1.6 Anexos: tabla completa de registros de emisión, metodología detallada, factores de emisión usados, certificaciones
+      - [ ] 11.12.1.7 Footer en cada página: número de página, fecha de generación, versión del reporte
+    - [ ] 11.12.2 Crear `src/lib/emissions/reports/inventory-excel-generator.ts` - Generador de Excel con múltiples hojas:
+      - [ ] 11.12.2.1 Hoja "Resumen": tabla con totales por alcance, gráficos embebidos
+      - [ ] 11.12.2.2 Hoja "Alcance 1": tabla detallada de todas las fuentes y registros
+      - [ ] 11.12.2.3 Hoja "Alcance 2": tabla de consumo de electricidad mensual
+      - [ ] 11.12.2.4 Hoja "Alcance 3": tabla de actividades de cadena de valor
+      - [ ] 11.12.2.5 Hoja "Metodología": documentación de factores de emisión y metodología de cálculo
+      - [ ] 11.12.2.6 Formateo: colores por alcance, totales en negrita, formato de números con separadores de miles
+  - [ ] 11.13 Crear dashboard de emisiones industriales agregado:
+    - [ ] 11.13.1 Crear `src/app/(dashboard)/dashboard/emisiones-industriales/page.tsx` - Dashboard nacional de emisiones industriales
+    - [ ] 11.13.2 Crear `src/components/dashboard/emisiones/industry-emissions-stats.tsx` - 5 cards: Total industrias registradas, Total emisiones año actual (tonCO2e), Emisiones por sector, Tendencia vs. año anterior, Inventarios pendientes de verificación
+    - [ ] 11.13.3 Crear `src/components/dashboard/emisiones/industry-emissions-map.tsx` - Mapa de Bolivia mostrando industrias como markers (color por nivel de emisiones, tamaño por emisiones totales)
+    - [ ] 11.13.4 Crear `src/components/dashboard/emisiones/sector-comparison-chart.tsx` - Gráfico de barras horizontal comparando emisiones totales por sector industrial
+    - [ ] 11.13.5 Crear `src/components/dashboard/emisiones/scope-distribution-chart.tsx` - Gráfico de pie nacional mostrando distribución entre Alcance 1, 2 y 3
+    - [ ] 11.13.6 Crear `src/components/dashboard/emisiones/top-emitters-table.tsx` - Tabla con top 10 industrias emisoras (ranking, nombre, sector, departamento, emisiones totales, intensidad)
+    - [ ] 11.13.7 Crear `src/components/dashboard/emisiones/emissions-trend-chart.tsx` - Gráfico de línea mostrando tendencia mensual de emisiones nacionales por sector
+  - [ ] 11.14 Crear página pública de transparencia de emisiones:
+    - [ ] 11.14.1 Crear `src/app/(public)/emisiones-industriales/page.tsx` - Portal público de consulta de emisiones industriales
+    - [ ] 11.14.2 Crear `src/components/public/public-emissions-map.tsx` - Mapa público mostrando solo inventarios verificados
+    - [ ] 11.14.3 Crear `src/components/public/sector-emissions-ranking.tsx` - Ranking de sectores industriales por emisiones totales
+    - [ ] 11.14.4 Crear `src/components/public/public-inventory-search.tsx` - Buscador de inventarios verificados (por nombre de industria, sector, año)
+    - [ ] 11.14.5 Crear API route público `src/app/api/public/emissions/stats/route.ts` - Estadísticas agregadas de emisiones industriales (solo inventarios verificados)
+  - [ ] 11.15 Implementar sistema de notificaciones para emisiones:
+    - [ ] 11.15.1 Notificación cuando se acerca fecha límite para inventario anual (30 días antes)
+    - [ ] 11.15.2 Notificación cuando industria supera línea base de su sector (+15%)
+    - [ ] 11.15.3 Notificación cuando inventario es verificado por SUPERADMIN
+    - [ ] 11.15.4 Notificación cuando se detectan inconsistencias en datos (ej: emisiones muy altas vs. promedio del sector)
+  - [ ] 11.16 Integración con módulo de organizaciones:
+    - [ ] 11.16.1 Agregar tab "Industrias" en página de detalle de organización
+    - [ ] 11.16.2 Mostrar métricas agregadas de emisiones en organization-card
+    - [ ] 11.16.3 Permitir crear industria desde formulario de organización (inline creation)
+  - [ ] 11.17 Testing y validación:
+    - [ ] 11.17.1 Crear tests unitarios `src/lib/emissions/__tests__/industrial-calculator.test.ts`:
+      - [ ] 11.17.1.1 Test de cálculo de Alcance 1 (combustión de diesel, gasolina, gas natural)
+      - [ ] 11.17.1.2 Test de cálculo de Alcance 2 (electricidad con factor Bolivia)
+      - [ ] 11.17.1.3 Test de conversión de GEI a CO₂e usando GWP
+      - [ ] 11.17.1.4 Test de cálculo de intensidad de emisión
+      - [ ] 11.17.1.5 Test de comparación año contra año
+    - [ ] 11.17.2 Crear tests unitarios `src/lib/emissions/__tests__/emission-factors.test.ts` - Verificar que factores de emisión coincidan con IPCC 2006
+    - [ ] 11.17.3 Crear test E2E `tests/e2e/industry-registration-and-inventory.spec.ts`:
+      - [ ] 11.17.3.1 Registrar nueva industria
+      - [ ] 11.17.3.2 Agregar 3 fuentes de emisión (combustión, electricidad, transporte)
+      - [ ] 11.17.3.3 Registrar 10 emisiones a lo largo del año
+      - [ ] 11.17.3.4 Generar inventario anual
+      - [ ] 11.17.3.5 Verificar que PDF se genera correctamente
+  - [ ] 11.18 Documentación:
+    - [ ] 11.18.1 Crear `docs/EMISSIONS_METHODOLOGY.md` - Documentación de metodologías usadas (GHG Protocol, ISO 14064, IPCC 2006)
+    - [ ] 11.18.2 Crear `docs/EMISSION_FACTORS.md` - Documentación de todos los factores de emisión, fuentes, fecha de actualización
+    - [ ] 11.18.3 Crear `docs/INDUSTRY_USER_GUIDE.md` - Guía para usuarios industriales sobre cómo registrar sus emisiones
+    - [ ] 11.18.4 Crear plantilla Excel descargable `public/templates/bulk-emissions-import-template.xlsx` con instrucciones y formato
+
 ---
 
 ## Notas Importantes para Implementación

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma, AlertSeverity, AlertStatus } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,18 +16,18 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "50");
 
     // Build where clause
-    const where: any = {};
+    const where: Prisma.DeforestationAlertWhereInput = {};
 
     if (department) {
       where.department = department;
     }
 
     if (severity) {
-      where.severity = severity;
+      where.severity = severity as AlertSeverity;
     }
 
     if (status) {
-      where.status = status;
+      where.status = status as AlertStatus;
     }
 
     if (dateFrom || dateTo) {
@@ -48,14 +49,6 @@ export async function GET(request: NextRequest) {
         },
         skip: (page - 1) * limit,
         take: limit,
-        include: {
-          nearProject: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
       }),
       prisma.deforestationAlert.count({ where }),
     ]);

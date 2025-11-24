@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { SeverityBadge } from "./severity-badge";
 import { AlertStatusSelect } from "./alert-status-select";
 import { AlertListItem } from "@/types/alert";

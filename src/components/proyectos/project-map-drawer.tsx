@@ -81,8 +81,6 @@ export function ProjectMapDrawer({
       const drawControl = new L.Control.Draw({
         edit: {
           featureGroup: drawnItems,
-          edit: true,
-          remove: true,
         },
         draw: {
           polygon: {
@@ -110,15 +108,17 @@ export function ProjectMapDrawer({
       map.addControl(drawControl);
 
       // Handle drawn shapes
-      map.on(L.Draw.Event.CREATED, (e: any) => {
-        const layer = e.layer;
+      map.on(L.Draw.Event.CREATED, (e) => {
+        const event = e as L.DrawEvents.Created;
+        const layer = event.layer;
         drawnItems.clearLayers();
         drawnItems.addLayer(layer);
         handleLayerCreated(layer);
       });
 
-      map.on(L.Draw.Event.EDITED, (e: any) => {
-        const layers = e.layers;
+      map.on(L.Draw.Event.EDITED, (e) => {
+        const event = e as L.DrawEvents.Edited;
+        const layers = event.layers;
         layers.eachLayer((layer: L.Layer) => {
           handleLayerCreated(layer);
         });
@@ -154,8 +154,8 @@ export function ProjectMapDrawer({
     };
   }, [open, initialGeometry]);
 
-  const handleLayerCreated = (layer: any) => {
-    const geoJson = layer.toGeoJSON();
+  const handleLayerCreated = (layer: L.Layer) => {
+    const geoJson = (layer as L.Polygon | L.Rectangle).toGeoJSON();
     const geometry = geoJson.geometry as GeoJSON.Polygon;
 
     // Validate polygon
@@ -185,7 +185,7 @@ export function ProjectMapDrawer({
       setAreaHectares(area);
       setIsValid(true);
       setValidationError(null);
-    } catch (error) {
+    } catch {
       setIsValid(false);
       setValidationError("Error al validar el polígono");
       setCurrentPolygon(null);

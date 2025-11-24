@@ -44,14 +44,14 @@ async function findNearestProject(
   for (const project of projects) {
     try {
       // Extract a representative point from project geometry (centroid or first coordinate)
-      const geometry = project.geometry as any;
+      const geometry = project.geometry as { type: string; coordinates: number[][][] | number[][][][] };
       let projectPoint;
 
       if (geometry.type === 'Polygon') {
-        const coords = geometry.coordinates[0][0];
+        const coords = geometry.coordinates[0][0] as number[];
         projectPoint = point([coords[0], coords[1]]);
       } else if (geometry.type === 'MultiPolygon') {
-        const coords = geometry.coordinates[0][0][0];
+        const coords = geometry.coordinates[0][0][0] as number[];
         projectPoint = point([coords[0], coords[1]]);
       } else {
         continue;

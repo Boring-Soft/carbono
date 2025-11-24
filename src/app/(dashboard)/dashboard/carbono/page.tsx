@@ -9,6 +9,7 @@ import { FiltersBar, DashboardFilters } from "@/components/dashboard/carbono/fil
 import { TrendCharts } from "@/components/dashboard/carbono/trend-charts";
 import { ProjectMarkerData } from "@/components/maps/project-marker";
 import { AlertMarkerData } from "@/components/maps/alert-marker";
+import { ProjectStatus } from "@prisma/client";
 
 async function fetchDashboardStats() {
   const response = await fetch("/api/dashboard/stats");
@@ -28,6 +29,18 @@ async function fetchDashboardTrends() {
   return data.data;
 }
 
+interface ProjectApiResponse {
+  id: string;
+  name: string;
+  status: string;
+  type: string;
+  areaHectares: number;
+  estimatedCo2TonsYear: number;
+  geometry: {
+    coordinates: number[][][];
+  };
+}
+
 async function fetchProjects(filters: DashboardFilters) {
   const params = new URLSearchParams();
   if (filters.department) params.append("department", filters.department);
@@ -43,7 +56,7 @@ async function fetchProjects(filters: DashboardFilters) {
   const data = await response.json();
 
   // Transform to marker data
-  return data.data.map((project: any): ProjectMarkerData => {
+  return data.data.map((project: ProjectApiResponse): ProjectMarkerData => {
     // Extract centroid from geometry
     const coordinates = project.geometry.coordinates[0];
     const lats = coordinates.map((coord: number[]) => coord[1]);
@@ -54,7 +67,7 @@ async function fetchProjects(filters: DashboardFilters) {
     return {
       id: project.id,
       name: project.name,
-      status: project.status,
+      status: project.status as ProjectStatus,
       type: project.type,
       areaHectares: project.areaHectares,
       estimatedCo2TonsYear: project.estimatedCo2TonsYear,
@@ -62,6 +75,17 @@ async function fetchProjects(filters: DashboardFilters) {
       longitude,
     };
   });
+}
+
+interface AlertApiResponse {
+  id: string;
+  latitude: number;
+  longitude: number;
+  severity: string;
+  detectedAt: string;
+  confidence: number;
+  brightness: number;
+  nearProjectDistance: number | null;
 }
 
 async function fetchAlerts(filters: DashboardFilters) {
@@ -76,11 +100,11 @@ async function fetchAlerts(filters: DashboardFilters) {
   }
   const data = await response.json();
 
-  return data.data.map((alert: any): AlertMarkerData => ({
+  return data.data.map((alert: AlertApiResponse): AlertMarkerData => ({
     id: alert.id,
     latitude: alert.latitude,
     longitude: alert.longitude,
-    severity: alert.severity,
+    severity: alert.severity as "LOW" | "MEDIUM" | "HIGH",
     detectedAt: new Date(alert.detectedAt),
     confidence: alert.confidence,
     brightness: alert.brightness,
@@ -109,13 +133,13 @@ export default function DashboardCarbonoPage() {
     refetchInterval: 1000 * 60 * 10, // Refetch every 10 minutes
   });
 
-  const { data: projects = [], isLoading: projectsLoading } = useQuery({
+  const { data: projects = [] } = useQuery({
     queryKey: ["dashboard-projects", filters],
     queryFn: () => fetchProjects(filters),
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 
-  const { data: alerts = [], isLoading: alertsLoading } = useQuery({
+  const { data: alerts = [] } = useQuery({
     queryKey: ["dashboard-alerts", filters],
     queryFn: () => fetchAlerts(filters),
     staleTime: 1000 * 60 * 2, // 2 minutes

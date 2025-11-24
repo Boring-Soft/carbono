@@ -55,7 +55,7 @@ const reportTypes: { value: ReportType; label: string }[] = [
   { value: "MONTHLY", label: "Reporte Mensual" },
 ];
 
-const formats: { value: ReportFormat; label: string; icon: any }[] = [
+const formats: { value: ReportFormat; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { value: "PDF", label: "PDF", icon: FileText },
   { value: "EXCEL", label: "Excel", icon: Table2 },
 ];

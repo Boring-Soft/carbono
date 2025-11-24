@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { ProjectStatus } from "@prisma/client";
 import { NationalReportData } from "@/types/report";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Get all active projects
     const projects = await prisma.project.findMany({
@@ -23,9 +23,9 @@ export async function GET(request: NextRequest) {
 
     // Calculate summary
     const totalProjects = projects.length;
-    const totalHectares = projects.reduce((sum, p) => sum + p.areaHectares, 0);
+    const totalHectares = projects.reduce((sum, p) => sum + Number(p.areaHectares), 0);
     const totalCo2Year = projects.reduce(
-      (sum, p) => sum + (p.estimatedCo2TonsYear || 0),
+      (sum, p) => sum + Number(p.estimatedCo2TonsYear || 0),
       0
     );
     const revenuePotential = totalCo2Year * 15; // Realistic scenario
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     }));
 
     // Projects by type
-    const projectsByType = projects.reduce((acc: any, p) => {
+    const projectsByType = projects.reduce((acc: Record<string, number>, p) => {
       if (!acc[p.type]) {
         acc[p.type] = 0;
       }
@@ -45,19 +45,26 @@ export async function GET(request: NextRequest) {
       return acc;
     }, {});
 
+    interface DepartmentBreakdown {
+      department: string;
+      projectCount: number;
+      hectares: number;
+      co2TonsYear: number;
+    }
+
     // Department breakdown
-    const departmentBreakdown = projects.reduce((acc: any[], p) => {
+    const departmentBreakdown = projects.reduce((acc: DepartmentBreakdown[], p) => {
       const existing = acc.find((d) => d.department === p.department);
       if (existing) {
         existing.projectCount++;
-        existing.hectares += p.areaHectares;
-        existing.co2TonsYear += p.estimatedCo2TonsYear || 0;
+        existing.hectares += Number(p.areaHectares);
+        existing.co2TonsYear += Number(p.estimatedCo2TonsYear || 0);
       } else {
         acc.push({
           department: p.department,
           projectCount: 1,
-          hectares: p.areaHectares,
-          co2TonsYear: p.estimatedCo2TonsYear || 0,
+          hectares: Number(p.areaHectares),
+          co2TonsYear: Number(p.estimatedCo2TonsYear || 0),
         });
       }
       return acc;
@@ -67,9 +74,17 @@ export async function GET(request: NextRequest) {
 
     // Top projects by CO2 capture
     const topProjects = projects
-      .filter((p) => p.estimatedCo2TonsYear && p.estimatedCo2TonsYear > 0)
-      .sort((a, b) => (b.estimatedCo2TonsYear || 0) - (a.estimatedCo2TonsYear || 0))
-      .slice(0, 10);
+      .filter((p) => p.estimatedCo2TonsYear && Number(p.estimatedCo2TonsYear) > 0)
+      .sort((a, b) => Number(b.estimatedCo2TonsYear || 0) - Number(a.estimatedCo2TonsYear || 0))
+      .slice(0, 10)
+      .map((p) => ({
+        id: p.id,
+        name: p.name,
+        type: p.type,
+        department: p.department,
+        areaHectares: Number(p.areaHectares),
+        estimatedCo2TonsYear: Number(p.estimatedCo2TonsYear || 0),
+      }));
 
     // Recent alerts
     const twoDaysAgo = new Date();

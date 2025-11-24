@@ -18,7 +18,7 @@ function parseCSVLine(line: string, headers: string[]): NASAFIRMSRawData | null 
     return null;
   }
 
-  const data: any = {};
+  const data: Record<string, string> = {};
   headers.forEach((header, index) => {
     data[header] = values[index];
   });
@@ -36,13 +36,13 @@ function parseCSVLine(line: string, headers: string[]): NASAFIRMSRawData | null 
     track: parseFloat(data.track),
     acq_date: data.acq_date,
     acq_time: data.acq_time,
-    satellite: data.satellite,
-    instrument: data.instrument,
+    satellite: data.satellite as "Aqua" | "Terra" | "SNPP" | "NOAA-20" | "NOAA-21",
+    instrument: data.instrument as "MODIS" | "VIIRS",
     confidence: data.confidence,
     version: data.version,
     bright_t31: parseFloat(data.bright_t31),
     frp: parseFloat(data.frp),
-    daynight: data.daynight,
+    daynight: data.daynight as "D" | "N",
   };
 }
 

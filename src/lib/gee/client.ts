@@ -3,9 +3,10 @@
  * Handles authentication and API calls to Google Earth Engine
  */
 
+// @ts-expect-error - @google/earthengine doesn't have TypeScript declarations
 import ee from '@google/earthengine';
-import { GEEAuthConfig, ForestType } from '@/types/gee';
-import { GEE_CONFIG, HANSEN_FOREST_CHANGE, SENTINEL_2, MODIS_NDVI, NASA_BIOMASS } from './datasets';
+import { ForestType } from '@/types/gee';
+import { GEE_CONFIG, HANSEN_FOREST_CHANGE, MODIS_NDVI, NASA_BIOMASS } from './datasets';
 
 let isInitialized = false;
 
@@ -63,7 +64,7 @@ export async function calculateForestCoverage(
 
   return new Promise((resolve, reject) => {
     try {
-      const eeGeometry = ee.Geometry(geometry as any);
+      const eeGeometry = ee.Geometry(geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon);
 
       // Use Hansen dataset to get tree cover
       const hansen = ee.Image(HANSEN_FOREST_CHANGE.id);
@@ -77,7 +78,7 @@ export async function calculateForestCoverage(
         maxPixels: GEE_CONFIG.MAX_PIXELS,
       });
 
-      stats.evaluate((result: any, error: any) => {
+      stats.evaluate((result: Record<string, number> | null, error: Error | null) => {
         if (error) {
           reject(error);
         } else {
@@ -101,7 +102,7 @@ export async function calculateBiomass(
 
   return new Promise((resolve, reject) => {
     try {
-      const eeGeometry = ee.Geometry(geometry as any);
+      const eeGeometry = ee.Geometry(geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon);
 
       // Use NASA biomass dataset
       const biomass = ee.Image(NASA_BIOMASS.id).select('agb');
@@ -114,7 +115,7 @@ export async function calculateBiomass(
         maxPixels: GEE_CONFIG.MAX_PIXELS,
       });
 
-      stats.evaluate((result: any, error: any) => {
+      stats.evaluate((result: Record<string, number> | null, error: Error | null) => {
         if (error) {
           reject(error);
         } else {
@@ -138,10 +139,10 @@ export async function detectForestType(
 
   return new Promise((resolve, reject) => {
     try {
-      const eeGeometry = ee.Geometry(geometry as any);
+      const eeGeometry = ee.Geometry(geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon);
       const centroid = eeGeometry.centroid();
 
-      centroid.coordinates().evaluate((coords: any, error: any) => {
+      centroid.coordinates().evaluate((coords: [number, number], error: Error | null) => {
         if (error) {
           reject(error);
           return;
@@ -185,7 +186,7 @@ export async function detectForestLoss(
 
   return new Promise((resolve, reject) => {
     try {
-      const eeGeometry = ee.Geometry(geometry as any);
+      const eeGeometry = ee.Geometry(geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon);
 
       // Use Hansen dataset to detect loss
       const hansen = ee.Image(HANSEN_FOREST_CHANGE.id);
@@ -218,7 +219,7 @@ export async function detectForestLoss(
         }).get('lossyear'),
       });
 
-      stats.evaluate((result: any, error: any) => {
+      stats.evaluate((result: Record<string, number> | null, error: Error | null) => {
         if (error) {
           reject(error);
         } else {
@@ -255,7 +256,7 @@ export async function getNDVITimeSeries(
 
   return new Promise((resolve, reject) => {
     try {
-      const eeGeometry = ee.Geometry(geometry as any);
+      const eeGeometry = ee.Geometry(geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon);
 
       // Use MODIS NDVI dataset
       const modis = ee.ImageCollection(MODIS_NDVI.id)
@@ -263,7 +264,7 @@ export async function getNDVITimeSeries(
         .filterBounds(eeGeometry);
 
       // Calculate mean NDVI for each image
-      const ndviTimeSeries = modis.map((image: any) => {
+      const ndviTimeSeries = modis.map((image: ee.Image) => {
         const ndvi = image.select('NDVI');
         const mean = ndvi.reduceRegion({
           reducer: ee.Reducer.mean(),
@@ -278,17 +279,17 @@ export async function getNDVITimeSeries(
         });
       });
 
-      ndviTimeSeries.evaluate((featureCollection: any, error: any) => {
+      ndviTimeSeries.evaluate((featureCollection: { features: Array<{ properties: { date: number; ndvi: number } }> } | null, error: Error | null) => {
         if (error) {
           reject(error);
         } else {
           const features = featureCollection?.features || [];
           const data = features
-            .map((f: any) => ({
+            .map((f: { properties: { date: number; ndvi: number } }) => ({
               date: new Date(f.properties.date),
               ndvi: (f.properties.ndvi / 10000) || 0, // MODIS NDVI is scaled by 10000
             }))
-            .filter((d: any) => d.ndvi !== null && d.ndvi !== undefined);
+            .filter((d: { date: Date; ndvi: number }) => d.ndvi !== null && d.ndvi !== undefined);
 
           resolve(data);
         }

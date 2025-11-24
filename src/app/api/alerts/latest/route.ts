@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { Prisma, AlertSeverity } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
     const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000);
 
     // Build where clause
-    const where: any = {
+    const where: Prisma.DeforestationAlertWhereInput = {
       detectedAt: {
         gte: cutoffTime,
       },
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
           { status: 400 }
         );
       }
-      where.severity = severity;
+      where.severity = severity as AlertSeverity;
     }
 
     // Fetch alerts

@@ -4,7 +4,6 @@
  */
 
 import { z } from 'zod';
-import { OrganizationType } from '@prisma/client';
 
 /**
  * Schema for creating a new organization
@@ -15,7 +14,7 @@ export const createOrganizationSchema = z.object({
     .max(200, 'El nombre no puede exceder 200 caracteres')
     .trim(),
 
-  type: z.nativeEnum(OrganizationType, {
+  type: z.enum(["Community", "NGO", "Government", "Private"], {
     errorMap: () => ({ message: 'Tipo de organizacion invalido' }),
   }),
 
@@ -49,7 +48,7 @@ export const updateOrganizationSchema = z.object({
     .trim()
     .optional(),
 
-  type: z.nativeEnum(OrganizationType, {
+  type: z.enum(["Community", "NGO", "Government", "Private"], {
     errorMap: () => ({ message: 'Tipo de organizacion invalido' }),
   }).optional(),
 
@@ -75,7 +74,7 @@ export const updateOrganizationSchema = z.object({
  */
 export const organizationQuerySchema = z.object({
   search: z.string().max(200).optional(),
-  type: z.nativeEnum(OrganizationType).optional(),
+  type: z.enum(["Community", "NGO", "Government", "Private"]).optional(),
   page: z.coerce.number().int().min(1).default(1).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
   sortBy: z.enum(['name', 'createdAt', 'totalProjects', 'totalHectares']).default('createdAt').optional(),

@@ -51,7 +51,15 @@ async function getPublicProjects() {
     const data = await response.json();
 
     // Transform to marker data
-    return data.data.map((project: any) => {
+    return data.data.map((project: {
+      id: string;
+      name: string;
+      status: string;
+      type: string;
+      areaHectares: number;
+      estimatedCo2TonsYear: number;
+      geometry: { coordinates: number[][][] };
+    }) => {
       // Extract centroid from geometry
       const coordinates = project.geometry.coordinates[0];
       const lats = coordinates.map((coord: number[]) => coord[1]);

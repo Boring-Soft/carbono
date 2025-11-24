@@ -5,7 +5,6 @@ import {
   AlertTriangle,
   Building2,
   FileText,
-  Command,
   Map,
 } from "lucide-react";
 import type { SidebarData } from "../types";

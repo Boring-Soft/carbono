@@ -2,15 +2,9 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@supabase/supabase-js";
 import {
   generateNationalReport,
-  generateDepartmentReport,
-  generateProjectReport,
-  generateMonthlyReport,
 } from "./pdf-generator";
 import {
   generateNationalExcel,
-  generateDepartmentExcel,
-  generateProjectExcel,
-  generateMonthlyExcel,
 } from "./excel-generator";
 import { ReportMetadata, ReportType, ReportFormat } from "@/types/report";
 
@@ -23,7 +17,7 @@ interface AsyncReportJob {
   id: string;
   type: ReportType;
   format: ReportFormat;
-  parameters: any;
+  parameters: Record<string, unknown>;
   userId?: string;
 }
 
@@ -32,7 +26,7 @@ interface AsyncReportJob {
  * This function can be called from a background job queue (e.g., BullMQ, Inngest)
  */
 export async function generateReportAsync(job: AsyncReportJob): Promise<void> {
-  const { id, type, format, parameters, userId } = job;
+  const { id, type, format, parameters } = job;
 
   try {
     // Update status to processing
@@ -106,12 +100,16 @@ export async function generateReportAsync(job: AsyncReportJob): Promise<void> {
 async function generateReportBuffer(
   type: ReportType,
   format: ReportFormat,
-  parameters: any
+  parameters: Record<string, unknown>
 ): Promise<Buffer> {
   const metadata: ReportMetadata = {
     generatedAt: new Date(),
     reportType: type,
-    parameters,
+    parameters: {
+      type,
+      format,
+      ...parameters,
+    },
   };
 
   // Fetch data based on report type
@@ -147,7 +145,7 @@ async function generateReportBuffer(
 export async function queueReportGeneration(
   type: ReportType,
   format: ReportFormat,
-  parameters: any,
+  parameters: Record<string, unknown>,
   userId?: string
 ): Promise<string> {
   const title = getReportTitle(type, parameters);
@@ -162,7 +160,7 @@ export async function queueReportGeneration(
       fileUrl: "",
       status: "processing",
       generatedBy: userId || null,
-      parameters,
+      parameters: JSON.parse(JSON.stringify(parameters)),
     },
   });
 
@@ -185,7 +183,7 @@ export async function queueReportGeneration(
   return report.id;
 }
 
-function getReportTitle(type: ReportType, parameters: any): string {
+function getReportTitle(type: ReportType, parameters: Record<string, unknown>): string {
   switch (type) {
     case "NATIONAL":
       return "Reporte Nacional";

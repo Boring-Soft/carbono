@@ -8,9 +8,17 @@ import { Progress } from "@/components/ui/progress";
 import { Upload, File, X, CheckCircle, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+interface Document {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
+  createdAt: Date;
+}
+
 interface DocumentUploadProps {
   projectId: string;
-  onUploadComplete?: (document: any) => void;
+  onUploadComplete?: (document: Document) => void;
   uploadedBy?: string;
 }
 
@@ -19,11 +27,10 @@ interface UploadedFile {
   status: "pending" | "uploading" | "success" | "error";
   progress: number;
   error?: string;
-  document?: any;
+  document?: Document;
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/jpg"];
 
 export function DocumentUpload({
   projectId,
@@ -32,33 +39,8 @@ export function DocumentUpload({
 }: DocumentUploadProps) {
   const [files, setFiles] = useState<UploadedFile[]>([]);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const newFiles: UploadedFile[] = acceptedFiles.map((file) => ({
-      file,
-      status: "pending",
-      progress: 0,
-    }));
-
-    setFiles((prev) => [...prev, ...newFiles]);
-
-    // Start uploading each file
-    newFiles.forEach((uploadFile) => {
-      uploadFile(uploadFile.file);
-    });
-  }, [projectId]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      "application/pdf": [".pdf"],
-      "image/jpeg": [".jpg", ".jpeg"],
-      "image/png": [".png"],
-    },
-    maxSize: MAX_FILE_SIZE,
-  });
-
-  const uploadFile = async (file: File) => {
-    const updateFileStatus = (status: UploadedFile["status"], progress: number, error?: string, document?: any) => {
+  const uploadFile = useCallback(async (file: File) => {
+    const updateFileStatus = (status: UploadedFile["status"], progress: number, error?: string, document?: Document) => {
       setFiles((prev) =>
         prev.map((f) =>
           f.file === file
@@ -108,7 +90,32 @@ export function DocumentUpload({
     } catch (error) {
       updateFileStatus("error", 0, error instanceof Error ? error.message : "Unknown error");
     }
-  };
+  }, [projectId, onUploadComplete, uploadedBy]);
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const newFiles: UploadedFile[] = acceptedFiles.map((file) => ({
+      file,
+      status: "pending",
+      progress: 0,
+    }));
+
+    setFiles((prev) => [...prev, ...newFiles]);
+
+    // Start uploading each file
+    newFiles.forEach((uploadedFile) => {
+      uploadFile(uploadedFile.file);
+    });
+  }, [uploadFile]);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "application/pdf": [".pdf"],
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+    },
+    maxSize: MAX_FILE_SIZE,
+  });
 
   const removeFile = (file: File) => {
     setFiles((prev) => prev.filter((f) => f.file !== file));

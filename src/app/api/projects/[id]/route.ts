@@ -22,10 +22,10 @@ export const maxDuration = 60;
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const project = await prisma.project.findUnique({
       where: { id },
@@ -93,10 +93,10 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     // Validate input
@@ -149,12 +149,14 @@ export async function PATCH(
           { status: 404 }
         );
       }
-      updateData.organizationId = input.organizationId;
+      updateData.organization = {
+        connect: { id: input.organizationId },
+      };
     }
 
     // Check if geometry or type changed (requires CO₂ recalculation)
     let needsRecalculation = false;
-    let newAreaHectares = existingProject.areaHectares;
+    let newAreaHectares = Number(existingProject.areaHectares);
 
     if (input.geometry) {
       // Validate new geometry
@@ -186,13 +188,12 @@ export async function PATCH(
       console.log(`🔄 Recalculating CO₂ for project ${id}...`);
 
       const projectType = input.type || existingProject.type;
-      const geometry = input.geometry || (existingProject.geometry as any);
 
       // Analyze with GEE if geometry changed
       let geeAnalysis = null;
       if (input.geometry) {
         try {
-          geeAnalysis = await analyzeArea(geometry);
+          geeAnalysis = await analyzeArea(input.geometry);
           updateData.geeVerified = true;
           updateData.geeLastCheck = new Date();
           updateData.forestCoveragePercent = geeAnalysis.forestCoveragePercent;
@@ -204,7 +205,7 @@ export async function PATCH(
       // Calculate carbon
       const forestType: ForestType = geeAnalysis?.forestType || ForestType.UNKNOWN;
       const carbonCalc = calculateCarbonCapture({
-        areaHectares: newAreaHectares.toNumber(),
+        areaHectares: newAreaHectares,
         projectType,
         forestType,
         biomassPerHectare: geeAnalysis?.biomassPerHectare,
@@ -255,10 +256,10 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Check if project exists
     const project = await prisma.project.findUnique({

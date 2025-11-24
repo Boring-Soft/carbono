@@ -26,10 +26,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Plus, AlertTriangle } from "lucide-react";
 import { createOrganizationSchema } from "@/lib/validations/organization";
-import { OrganizationType } from "@prisma/client";
 import { toast } from "sonner";
 
 type FormData = z.infer<typeof createOrganizationSchema>;
+
+type OrganizationType = "Community" | "NGO" | "Government" | "Private";
 
 const TYPE_LABELS: Record<OrganizationType, string> = {
   Community: "Comunidad Indigena",
@@ -150,7 +151,7 @@ export function CreateOrganizationDialog({
           <div className="space-y-2">
             <Label htmlFor="type">Tipo de Organizacion *</Label>
             <Select
-              value={formData.type}
+              value={formData.type as string | undefined}
               onValueChange={(value) => setValue("type", value as OrganizationType)}
             >
               <SelectTrigger>

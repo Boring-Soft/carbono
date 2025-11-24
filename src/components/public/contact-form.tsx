@@ -42,7 +42,7 @@ export function ContactForm() {
 
       // Reset success message after 5 seconds
       setTimeout(() => setSuccess(false), 5000);
-    } catch (err) {
+    } catch {
       setError("Error al enviar el mensaje. Por favor intenta de nuevo.");
     } finally {
       setIsSubmitting(false);

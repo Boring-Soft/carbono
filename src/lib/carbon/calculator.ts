@@ -13,7 +13,7 @@ import {
   getIPCCFactorByDepartment,
   ForestType as LocalForestType
 } from './ipcc-factors';
-import { CARBON_MARKET_PRICES, calculateRevenue } from './market-prices';
+import { CARBON_MARKET_PRICES } from './market-prices';
 
 /**
  * CO₂ to Carbon conversion constant
@@ -181,7 +181,7 @@ export function calculateMultiYearProjection(
         conservative: annualCo2 * CARBON_MARKET_PRICES.conservative.pricePerTon,
         realistic: annualCo2 * CARBON_MARKET_PRICES.realistic.pricePerTon,
         optimistic: annualCo2 * CARBON_MARKET_PRICES.optimistic.pricePerTon,
-        currency: 'USD',
+        currency: 'USD' as const,
         perYear: true,
       },
     });

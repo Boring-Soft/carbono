@@ -1,29 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { updateAlertStatusSchema } from "@/lib/validations/alert";
+import { AlertStatus } from "@prisma/client";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const alert = await prisma.deforestationAlert.findUnique({
       where: {
-        id: params.id,
-      },
-      include: {
-        nearProject: {
-          select: {
-            id: true,
-            name: true,
-            type: true,
-            status: true,
-            areaHectares: true,
-            estimatedCo2TonsYear: true,
-          },
-        },
+        id,
       },
     });
+
+    // Fetch near project separately if it exists
+    let nearProject = null;
+    if (alert?.nearProjectId) {
+      nearProject = await prisma.project.findUnique({
+        where: { id: alert.nearProjectId },
+        select: {
+          id: true,
+          name: true,
+          type: true,
+          status: true,
+          areaHectares: true,
+          estimatedCo2TonsYear: true,
+        },
+      });
+    }
 
     if (!alert) {
       return NextResponse.json(
@@ -41,7 +47,15 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: alert,
+      data: {
+        ...alert,
+        latitude: Number(alert.latitude),
+        longitude: Number(alert.longitude),
+        brightness: alert.brightness ? Number(alert.brightness) : null,
+        nearProjectDistance: alert.nearProjectDistance ? Number(alert.nearProjectDistance) : null,
+        estimatedHectaresLost: alert.estimatedHectaresLost ? Number(alert.estimatedHectaresLost) : null,
+        nearProject,
+      },
     });
   } catch (error) {
     console.error("Error fetching alert detail:", error);
@@ -57,9 +71,10 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
 
     // Validate input
@@ -79,7 +94,7 @@ export async function PATCH(
 
     // Check if alert exists
     const existingAlert = await prisma.deforestationAlert.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!existingAlert) {
@@ -95,29 +110,36 @@ export async function PATCH(
     // Update alert
     const updatedAlert = await prisma.deforestationAlert.update({
       where: {
-        id: params.id,
+        id,
       },
       data: {
-        status,
+        status: status as AlertStatus,
         notes: notes || existingAlert.notes,
         updatedAt: new Date(),
       },
-      include: {
-        nearProject: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
     });
+
+    // Fetch near project separately if it exists
+    let nearProject = null;
+    if (updatedAlert.nearProjectId) {
+      nearProject = await prisma.project.findUnique({
+        where: { id: updatedAlert.nearProjectId },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+    }
 
     // TODO: Create notification if status changed to RESOLVED
     // This could notify stakeholders that the alert has been addressed
 
     return NextResponse.json({
       success: true,
-      data: updatedAlert,
+      data: {
+        ...updatedAlert,
+        nearProject,
+      },
       message: "Estado de alerta actualizado correctamente",
     });
   } catch (error) {

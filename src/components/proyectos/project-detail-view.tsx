@@ -11,8 +11,6 @@ import { StatusChangeDialog } from "./status-change-dialog";
 import { DocumentUpload } from "./document-upload";
 import {
   MapPin,
-  Building2,
-  Calendar,
   Leaf,
   FileText,
   History,
@@ -20,6 +18,40 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { formatUSDCompact } from "@/lib/carbon/market-prices";
+
+interface ProjectDocument {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
+  createdAt: Date;
+}
+
+interface CarbonCredit {
+  id: string;
+  projectId: string;
+  tonsCo2: number;
+  verificationDate: Date | null;
+  certificationBody: string | null;
+  status: string;
+  pricePerTon: number | null;
+  createdAt: Date;
+}
+
+interface StatusHistoryEntry {
+  id: string;
+  fromStatus: ProjectStatus | null;
+  toStatus: ProjectStatus;
+  notes: string | null;
+  createdAt: Date;
+}
+
+interface Alert {
+  id: string;
+  severity: string;
+  detectedAt: Date;
+  nearProjectDistance?: number;
+}
 
 interface Project {
   id: string;
@@ -45,10 +77,10 @@ interface Project {
     name: string;
     type: string;
   };
-  documents: any[];
-  carbonCredits: any[];
-  statusHistory: any[];
-  recentAlerts?: any[];
+  documents: ProjectDocument[];
+  carbonCredits: CarbonCredit[];
+  statusHistory: StatusHistoryEntry[];
+  recentAlerts?: Alert[];
 }
 
 const STATUS_LABELS: Record<ProjectStatus, string> = {
@@ -72,10 +104,8 @@ interface ProjectDetailViewProps {
 
 export function ProjectDetailView({ project }: ProjectDetailViewProps) {
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleStatusChanged = () => {
-    setRefreshKey((prev) => prev + 1);
     // In a real app, you'd refetch the project data here
     window.location.reload();
   };

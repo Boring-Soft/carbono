@@ -38,7 +38,7 @@ async function getProject(id: string) {
     }
 
     // Get recent alerts within 5km (skip if PostGIS not available)
-    let recentAlerts = [];
+    let recentAlerts: Awaited<ReturnType<typeof prisma.deforestationAlert.findMany>> = [];
     try {
       recentAlerts = await prisma.deforestationAlert.findMany({
         where: {
@@ -62,11 +62,18 @@ async function getProject(id: string) {
       areaHectares: Number(project.areaHectares),
       estimatedCo2TonsYear: project.estimatedCo2TonsYear ? Number(project.estimatedCo2TonsYear) : null,
       forestCoveragePercent: project.forestCoveragePercent ? Number(project.forestCoveragePercent) : null,
+      carbonCredits: project.carbonCredits.map((credit) => ({
+        ...credit,
+        tonsCo2: Number(credit.tonsCo2),
+        pricePerTon: credit.pricePerTon ? Number(credit.pricePerTon) : null,
+      })),
       recentAlerts: recentAlerts.map((alert) => ({
         ...alert,
         latitude: Number(alert.latitude),
         longitude: Number(alert.longitude),
         brightness: alert.brightness ? Number(alert.brightness) : null,
+        nearProjectDistance: alert.nearProjectDistance ? Number(alert.nearProjectDistance) : undefined,
+        estimatedHectaresLost: alert.estimatedHectaresLost ? Number(alert.estimatedHectaresLost) : null,
       })),
     };
   } catch (error) {
@@ -78,9 +85,10 @@ async function getProject(id: string) {
 export default async function ProyectoDetallePage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const project = await getProject(params.id);
+  const { id } = await params;
+  const project = await getProject(id);
 
   if (!project) {
     notFound();

@@ -22,13 +22,13 @@ export const CACHE_TTL = {
 /**
  * Generate a cache key from parameters
  */
-export function generateCacheKey(source: CacheSource, params: Record<string, any>): string {
+export function generateCacheKey(source: CacheSource, params: Record<string, unknown>): string {
   const sortedParams = Object.keys(params)
     .sort()
     .reduce((acc, key) => {
       acc[key] = params[key];
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, unknown>);
 
   const paramsString = JSON.stringify(sortedParams);
   const hash = crypto.createHash('sha256').update(paramsString).digest('hex');
@@ -41,11 +41,10 @@ export function generateCacheKey(source: CacheSource, params: Record<string, any
  */
 export async function getCachedData<T>(
   source: CacheSource,
-  params: Record<string, any>
+  params: Record<string, unknown>
 ): Promise<T | null> {
   try {
     const cacheKey = generateCacheKey(source, params);
-    const ttl = CACHE_TTL[source];
 
     const cached = await prisma.apiCache.findUnique({
       where: { cacheKey },
@@ -55,11 +54,10 @@ export async function getCachedData<T>(
       return null;
     }
 
-    // Check if cache is expired
+    // Check if cache is expired using the expiresAt field
     const now = new Date();
-    const expiresAt = new Date(cached.createdAt.getTime() + ttl);
 
-    if (now > expiresAt) {
+    if (now > cached.expiresAt) {
       // Cache expired, delete it
       await prisma.apiCache.delete({
         where: { cacheKey },
@@ -68,7 +66,7 @@ export async function getCachedData<T>(
     }
 
     // Parse and return cached data
-    return JSON.parse(cached.response) as T;
+    return JSON.parse(JSON.stringify(cached.data)) as T;
   } catch (error) {
     console.error('Error reading from cache:', error);
     return null;
@@ -80,23 +78,24 @@ export async function getCachedData<T>(
  */
 export async function setCachedData(
   source: CacheSource,
-  params: Record<string, any>,
-  data: any
+  params: Record<string, unknown>,
+  data: unknown
 ): Promise<void> {
   try {
     const cacheKey = generateCacheKey(source, params);
+    const ttl = CACHE_TTL[source];
+    const expiresAt = new Date(Date.now() + ttl);
 
     await prisma.apiCache.upsert({
       where: { cacheKey },
       create: {
         cacheKey,
-        source,
-        request: JSON.stringify(params),
-        response: JSON.stringify(data),
+        data: JSON.parse(JSON.stringify(data)),
+        expiresAt,
       },
       update: {
-        request: JSON.stringify(params),
-        response: JSON.stringify(data),
+        data: JSON.parse(JSON.stringify(data)),
+        expiresAt,
         createdAt: new Date(), // Reset creation time on update
       },
     });
@@ -111,7 +110,7 @@ export async function setCachedData(
  */
 export async function invalidateCache(
   source: CacheSource,
-  params: Record<string, any>
+  params: Record<string, unknown>
 ): Promise<void> {
   try {
     const cacheKey = generateCacheKey(source, params);
@@ -131,25 +130,16 @@ export async function clearExpiredCache(): Promise<number> {
   try {
     const now = new Date();
 
-    // Get all cache entries
-    const allCache = await prisma.apiCache.findMany();
+    // Delete all entries where expiresAt is in the past
+    const result = await prisma.apiCache.deleteMany({
+      where: {
+        expiresAt: {
+          lt: now,
+        },
+      },
+    });
 
-    let deletedCount = 0;
-
-    for (const cache of allCache) {
-      const source = cache.source as CacheSource;
-      const ttl = CACHE_TTL[source] || CACHE_TTL[CacheSource.GEE_ANALYZE_AREA];
-      const expiresAt = new Date(cache.createdAt.getTime() + ttl);
-
-      if (now > expiresAt) {
-        await prisma.apiCache.delete({
-          where: { cacheKey: cache.cacheKey },
-        });
-        deletedCount++;
-      }
-    }
-
-    return deletedCount;
+    return result.count;
   } catch (error) {
     console.error('Error clearing expired cache:', error);
     return 0;
@@ -162,7 +152,11 @@ export async function clearExpiredCache(): Promise<number> {
 export async function clearCacheBySource(source: CacheSource): Promise<number> {
   try {
     const result = await prisma.apiCache.deleteMany({
-      where: { source },
+      where: {
+        cacheKey: {
+          startsWith: `${source}:`,
+        },
+      },
     });
 
     return result.count;
@@ -184,7 +178,7 @@ export async function getCacheStats(): Promise<{
   try {
     const allCache = await prisma.apiCache.findMany({
       select: {
-        source: true,
+        cacheKey: true,
         createdAt: true,
       },
     });
@@ -192,7 +186,9 @@ export async function getCacheStats(): Promise<{
     const entriesBySource: Record<string, number> = {};
 
     for (const cache of allCache) {
-      entriesBySource[cache.source] = (entriesBySource[cache.source] || 0) + 1;
+      // Extract source from cacheKey (format: "SOURCE:hash")
+      const source = cache.cacheKey.split(':')[0];
+      entriesBySource[source] = (entriesBySource[source] || 0) + 1;
     }
 
     const sortedByDate = allCache.sort(
@@ -221,7 +217,7 @@ export async function getCacheStats(): Promise<{
  */
 export async function withCache<T>(
   source: CacheSource,
-  params: Record<string, any>,
+  params: Record<string, unknown>,
   fetchFn: () => Promise<T>
 ): Promise<T> {
   // Try to get from cache first

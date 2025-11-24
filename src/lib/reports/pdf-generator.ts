@@ -212,11 +212,11 @@ export async function generateDepartmentReport(
     }
 
     doc.setFontSize(11);
-    doc.setFont(undefined, "bold");
+    doc.setFont("helvetica", "bold");
     doc.text(`${index + 1}. ${project.name}`, 30, yPos);
     yPos += 6;
 
-    doc.setFont(undefined, "normal");
+    doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.text(`Tipo: ${project.type} | Estado: ${project.status}`, 35, yPos);
     yPos += 5;
@@ -239,6 +239,8 @@ export async function generateProjectReport(
   data: ProjectReportData,
   metadata: ReportMetadata
 ): Promise<Buffer> {
+  // metadata parameter is kept for API consistency but not currently used in the report body
+  void metadata;
   const doc = new jsPDF();
   let yPos = 30;
 
@@ -341,6 +343,8 @@ export async function generateMonthlyReport(
   data: MonthlyReportData,
   metadata: ReportMetadata
 ): Promise<Buffer> {
+  // metadata parameter is kept for API consistency but not currently used in the report body
+  void metadata;
   const doc = new jsPDF();
   let yPos = 30;
 

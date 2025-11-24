@@ -2,8 +2,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Building2, MapPin, Leaf, TrendingUp } from "lucide-react";
-import { ORGANIZATION_TYPE_LABELS } from "@/types/organization";
-import type { OrganizationType } from "@prisma/client";
+import { ORGANIZATION_TYPE_LABELS, type OrganizationType } from "@/types/organization";
 
 interface OrganizationCardProps {
   id: string;

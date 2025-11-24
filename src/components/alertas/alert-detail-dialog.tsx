@@ -9,7 +9,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SeverityBadge } from "./severity-badge";
 import { AlertDetail } from "@/types/alert";
@@ -111,7 +110,7 @@ export function AlertDetailDialog({
                   </div>
                   <div>
                     <div className="text-sm text-muted-foreground">Fuente</div>
-                    <div className="mt-1 font-medium">{alert.source}</div>
+                    <div className="mt-1 font-medium">NASA FIRMS</div>
                   </div>
                 </div>
               </CardContent>
@@ -135,14 +134,8 @@ export function AlertDetailDialog({
                   </div>
                   <div>
                     <div className="text-sm text-muted-foreground">Departamento</div>
-                    <div className="mt-1 font-medium">{alert.department}</div>
+                    <div className="mt-1 font-medium">{alert.department || 'No especificado'}</div>
                   </div>
-                  {alert.municipality && (
-                    <div>
-                      <div className="text-sm text-muted-foreground">Municipio</div>
-                      <div className="mt-1 font-medium">{alert.municipality}</div>
-                    </div>
-                  )}
                 </div>
 
                 <div className="pt-2">
@@ -177,14 +170,8 @@ export function AlertDetailDialog({
                       <div className="text-sm text-muted-foreground">Brillo</div>
                       <div className="mt-1 flex items-center gap-1">
                         <Flame className="h-4 w-4 text-orange-500" />
-                        <span className="font-medium">{alert.brightness} K</span>
+                        <span className="font-medium">{alert.brightness ? Number(alert.brightness) : 'N/A'} K</span>
                       </div>
-                    </div>
-                  )}
-                  {alert.frp && (
-                    <div>
-                      <div className="text-sm text-muted-foreground">FRP</div>
-                      <div className="mt-1 font-medium">{alert.frp} MW</div>
                     </div>
                   )}
                 </div>

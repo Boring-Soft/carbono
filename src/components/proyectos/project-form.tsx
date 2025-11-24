@@ -44,7 +44,7 @@ const projectFormSchema = z.object({
   department: z.string().min(1, "Selecciona un departamento"),
   municipality: z.string().optional(),
   communities: z.string().optional(),
-  geometry: z.any().refine((val) => val !== null, "Debes dibujar el área del proyecto"),
+  geometry: z.custom<GeoJSON.Polygon>((val) => val !== null && val !== undefined, "Debes dibujar el área del proyecto"),
   startDate: z.string().optional(),
   durationYears: z.coerce.number().min(1).max(50).optional(),
   coBenefits: z.array(z.string()).optional(),
@@ -109,7 +109,6 @@ export function ProjectForm({ organizations }: ProjectFormProps) {
 
   const formData = watch();
   const geometry = watch("geometry");
-  const projectType = watch("type");
   const selectedCoBenefits = watch("coBenefits") || [];
 
   const totalSteps = 4;
@@ -157,7 +156,7 @@ export function ProjectForm({ organizations }: ProjectFormProps) {
         throw new Error(errorData.message || "Error al crear el proyecto");
       }
 
-      const result = await response.json();
+      await response.json();
       toast.success("Proyecto creado exitosamente");
       // Redirect to projects list for now (detail page not implemented yet)
       router.push(`/proyectos`);
@@ -181,7 +180,6 @@ export function ProjectForm({ organizations }: ProjectFormProps) {
 
   const canProceedFromStep1 = formData.name && formData.type && formData.organizationId;
   const canProceedFromStep2 = formData.department && formData.geometry;
-  const canProceedFromStep3 = true; // Optional fields
 
   return (
     <>

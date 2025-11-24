@@ -1,10 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { ProjectStatus } from "@prisma/client";
 
 export const revalidate = 3600; // Cache for 1 hour
 
-export async function GET(request: NextRequest) {
+interface MonthlyDeforestationItem {
+  month: string;
+  count: number;
+  high: number;
+}
+
+export async function GET() {
   try {
     // 1. Monthly deforestation alerts (last 12 months)
     const twelveMonthsAgo = new Date();
@@ -26,7 +32,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Group by month
-    const monthlyDeforestation = alerts.reduce((acc: any[], alert) => {
+    const monthlyDeforestation = alerts.reduce((acc: MonthlyDeforestationItem[], alert) => {
       const month = alert.detectedAt.toISOString().substring(0, 7); // YYYY-MM
       const existing = acc.find((item) => item.month === month);
       if (existing) {
@@ -62,8 +68,8 @@ export async function GET(request: NextRequest) {
 
     const co2ByDepartment = projectsByDepartment.map((dept) => ({
       department: dept.department,
-      co2TonsYear: dept._sum.estimatedCo2TonsYear || 0,
-      hectares: dept._sum.areaHectares || 0,
+      co2TonsYear: Number(dept._sum.estimatedCo2TonsYear || 0),
+      hectares: Number(dept._sum.areaHectares || 0),
       projectCount: dept._count.id,
     }));
 

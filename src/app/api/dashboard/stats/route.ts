@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { ProjectStatus } from "@prisma/client";
 
 export const revalidate = 3600; // Cache for 1 hour
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Get active/certified projects
     const activeProjects = await prisma.project.findMany({

@@ -3,7 +3,7 @@
  * Provides functions for area calculation, distance measurement, and geometry validation
  */
 
-import { area, distance, simplify, booleanPointInPolygon, point, polygon } from '@turf/turf';
+import { area, distance, simplify, point } from '@turf/turf';
 import type { Polygon, MultiPolygon, Position } from 'geojson';
 import { BOLIVIA_BBOX } from './bolivia-boundaries';
 
@@ -107,7 +107,13 @@ export function simplifyPolygon(
   tolerance: number = 0.001
 ): Polygon | MultiPolygon {
   try {
-    const simplified = simplify(geometry, { tolerance, highQuality: true });
+    // Wrap geometry in a Feature for turf.simplify
+    const feature = {
+      type: 'Feature' as const,
+      properties: {},
+      geometry,
+    };
+    const simplified = simplify(feature, { tolerance, highQuality: true });
     return simplified.geometry as Polygon | MultiPolygon;
   } catch (error) {
     console.error('Error simplifying polygon:', error);
@@ -218,7 +224,7 @@ export function getCentroid(
     // Calculate average of all coordinates
     let sumLng = 0;
     let sumLat = 0;
-    let count = coordinates.length - 1; // Exclude closing point
+    const count = coordinates.length - 1; // Exclude closing point
 
     for (let i = 0; i < count; i++) {
       sumLng += coordinates[i][0];

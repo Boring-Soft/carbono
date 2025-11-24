@@ -65,7 +65,6 @@ export function CarbonMap({
       // Simple clustering logic for >100 markers
       if (projects.length > 100) {
         // Create marker cluster manually
-        const bounds = L.latLngBounds(projects.map(p => [p.latitude, p.longitude]));
         const zoom = map.getZoom();
 
         if (zoom < 8) {

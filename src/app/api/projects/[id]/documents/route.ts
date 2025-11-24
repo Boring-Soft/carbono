@@ -33,10 +33,10 @@ const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: projectId } = params;
+    const { id: projectId } = await params;
 
     // Check if project exists
     const project = await prisma.project.findUnique({
@@ -172,10 +172,10 @@ export async function POST(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: projectId } = params;
+    const { id: projectId } = await params;
 
     // Check if project exists
     const project = await prisma.project.findUnique({

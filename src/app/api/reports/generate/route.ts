@@ -2,15 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateReportSchema } from "@/lib/validations/report";
 import {
   generateNationalReport,
-  generateDepartmentReport,
-  generateProjectReport,
-  generateMonthlyReport,
 } from "@/lib/reports/pdf-generator";
 import {
   generateNationalExcel,
-  generateDepartmentExcel,
-  generateProjectExcel,
-  generateMonthlyExcel,
 } from "@/lib/reports/excel-generator";
 import { ReportMetadata } from "@/types/report";
 import { prisma } from "@/lib/prisma";
@@ -58,11 +52,15 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Create metadata
+    // Create metadata with proper date conversions
     const metadata: ReportMetadata = {
       generatedAt: new Date(),
       reportType: type,
-      parameters: validation.data,
+      parameters: {
+        ...validation.data,
+        dateFrom: validation.data.dateFrom ? new Date(validation.data.dateFrom) : undefined,
+        dateTo: validation.data.dateTo ? new Date(validation.data.dateTo) : undefined,
+      },
     };
     let buffer: Buffer;
     let fileName: string;
@@ -127,7 +125,7 @@ export async function POST(request: NextRequest) {
 
     // Upload to Supabase Storage
     const filePath = `reports/${fileName}`;
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("carbono-files")
       .upload(filePath, buffer, {
         contentType,

@@ -7,7 +7,7 @@ import { CARBON_MARKET_PRICES, formatUSDCompact } from "@/lib/carbon/market-pric
 
 interface CarbonPreviewProps {
   areaHectares: number;
-  estimatedCo2TonsYear: number | null;
+  estimatedCo2TonsYear?: number | null;
   forestType?: string;
   projectType?: string;
 }

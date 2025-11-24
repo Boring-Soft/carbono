@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -11,10 +11,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Building2, Plus, Search, Users, TreePine, Leaf } from "lucide-react";
+import { Building2, Plus, Search, Users, Leaf } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { OrganizationCard } from "@/components/organizaciones/organization-card";
+
+interface Project {
+  id: string;
+  name: string;
+}
 
 interface Organization {
   id: string;
@@ -24,7 +29,7 @@ interface Organization {
   contactPhone: string | null;
   address: string | null;
   createdAt: Date;
-  projects: any[];
+  projects: Project[];
   metrics: {
     totalProjects: number;
     totalHectares: number;
@@ -53,7 +58,6 @@ export default function OrganizacionesPage() {
   const {
     data: organizations = [],
     isLoading,
-    refetch,
   } = useQuery({
     queryKey: ["organizations", search, typeFilter],
     queryFn: () => fetchOrganizations(search, typeFilter),
@@ -184,7 +188,7 @@ export default function OrganizacionesPage() {
               key={org.id}
               id={org.id}
               name={org.name}
-              type={org.type as any}
+              type={org.type as "Community" | "NGO" | "Government" | "Private"}
               contactEmail={org.contactEmail}
               contactPhone={org.contactPhone}
               totalProjects={org.metrics.totalProjects}

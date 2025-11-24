@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
       projectType: input.type,
       forestType,
       biomassPerHectare: geeAnalysis?.biomassPerHectare,
-      durationYears: input.durationYears,
+      durationYears: input.durationYears || undefined,
     });
 
     console.log(`🌳 Estimated CO₂: ${carbonCalc.estimatedCo2TonsYear} tCO₂/year`);

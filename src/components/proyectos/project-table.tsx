@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   useReactTable,
@@ -39,7 +39,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ProjectStatus, ProjectType } from "@prisma/client";
 import { MoreHorizontal, Eye, Edit, Trash2, CheckCircle2 } from "lucide-react";
-import { formatUSDCompact } from "@/lib/carbon/market-prices";
 
 interface Project {
   id: string;
@@ -91,12 +90,7 @@ export function ProjectTable() {
     pageSize: 20,
   });
 
-  // Fetch projects
-  useEffect(() => {
-    fetchProjects();
-  }, [pagination.pageIndex, columnFilters]);
-
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -122,7 +116,12 @@ export function ProjectTable() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.pageIndex, pagination.pageSize, columnFilters]);
+
+  // Fetch projects
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const columns: ColumnDef<Project>[] = [
     {
@@ -139,7 +138,9 @@ export function ProjectTable() {
               {row.getValue("name")}
             </Link>
             {verified && (
-              <CheckCircle2 className="h-4 w-4 text-green-600" title="Verificado con GEE" />
+              <span title="Verificado con GEE">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+              </span>
             )}
           </div>
         );

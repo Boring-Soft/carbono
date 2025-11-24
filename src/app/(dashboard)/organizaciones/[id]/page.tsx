@@ -46,9 +46,10 @@ const TYPE_LABELS: Record<string, string> = {
 export default async function OrganizacionDetallePage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const organization = await getOrganization(params.id);
+  const { id } = await params;
+  const organization = await getOrganization(id);
 
   if (!organization) {
     notFound();

@@ -96,9 +96,9 @@ export const BOLIVIA_DEPARTMENTS: Record<string, DepartmentCoordinates> = {
 /**
  * Lista de nombres de departamentos (para selects/dropdowns)
  */
-export const DEPARTMENT_NAMES = Object.keys(BOLIVIA_DEPARTMENTS) as const;
+export const DEPARTMENT_NAMES = Object.keys(BOLIVIA_DEPARTMENTS) as string[];
 
-export type DepartmentName = (typeof DEPARTMENT_NAMES)[number];
+export type DepartmentName = keyof typeof BOLIVIA_DEPARTMENTS;
 
 /**
  * Coordenadas del centro geográfico de Bolivia
