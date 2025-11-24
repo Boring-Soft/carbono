@@ -128,7 +128,7 @@ export function AlertDetailDialog({
                     <div className="mt-1 flex items-center gap-1">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
                       <span className="font-mono text-sm">
-                        {alert.latitude.toFixed(4)}, {alert.longitude.toFixed(4)}
+                        {Number(alert.latitude).toFixed(4)}, {Number(alert.longitude).toFixed(4)}
                       </span>
                     </div>
                   </div>
@@ -193,7 +193,7 @@ export function AlertDetailDialog({
                       </div>
                       {alert.nearProjectDistance && (
                         <div className="text-sm text-red-600 font-medium mt-1">
-                          A {alert.nearProjectDistance.toFixed(2)} km de distancia
+                          A {Number(alert.nearProjectDistance).toFixed(2)} km de distancia
                         </div>
                       )}
                     </div>

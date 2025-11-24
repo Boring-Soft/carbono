@@ -561,7 +561,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                             <Badge variant="destructive">{alert.severity}</Badge>
                             <div className="text-sm text-muted-foreground mt-1">
                               {new Date(alert.detectedAt).toLocaleDateString("es-BO")} •{" "}
-                              {alert.nearProjectDistance?.toFixed(2)} km de distancia
+                              {alert.nearProjectDistance ? Number(alert.nearProjectDistance).toFixed(2) : 'N/A'} km de distancia
                             </div>
                           </div>
                           <Button variant="outline" size="sm" asChild>

@@ -48,7 +48,7 @@ export function AlertsTable({ alerts, onAlertClick, onStatusChanged }: AlertsTab
         <div className="space-y-1">
           <div className="flex items-center gap-1 text-xs font-mono text-muted-foreground">
             <MapPin className="h-3 w-3" />
-            {row.original.latitude.toFixed(4)}, {row.original.longitude.toFixed(4)}
+            {Number(row.original.latitude).toFixed(4)}, {Number(row.original.longitude).toFixed(4)}
           </div>
           <div className="text-sm font-medium">{row.original.department}</div>
           {row.original.municipality && (
@@ -131,7 +131,7 @@ export function AlertsTable({ alerts, onAlertClick, onStatusChanged }: AlertsTab
             </Link>
             {row.original.nearProjectDistance && (
               <div className="text-xs text-red-600 font-medium">
-                {row.original.nearProjectDistance.toFixed(2)} km
+                {Number(row.original.nearProjectDistance).toFixed(2)} km
               </div>
             )}
           </div>

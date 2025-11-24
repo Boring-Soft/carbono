@@ -122,7 +122,7 @@ export function createAlertMarker(
         <div style="display: flex; justify-content: space-between;">
           <span style="color: #6b7280;">Ubicación:</span>
           <span style="font-weight: 500; font-family: monospace; font-size: 10px;">
-            ${alert.latitude.toFixed(4)}, ${alert.longitude.toFixed(4)}
+            ${Number(alert.latitude).toFixed(4)}, ${Number(alert.longitude).toFixed(4)}
           </span>
         </div>
         ${
@@ -140,7 +140,7 @@ export function createAlertMarker(
             ? `
         <div style="display: flex; justify-content: space-between;">
           <span style="color: #6b7280;">Proyecto cercano:</span>
-          <span style="font-weight: 500; color: #ef4444;">${alert.nearProjectDistance.toFixed(2)} km</span>
+          <span style="font-weight: 500; color: #ef4444;">${Number(alert.nearProjectDistance).toFixed(2)} km</span>
         </div>
         `
             : ""
