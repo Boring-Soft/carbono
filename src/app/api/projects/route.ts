@@ -12,6 +12,7 @@ import { calculateCarbonCapture } from '@/lib/carbon/calculator';
 import { analyzeArea } from '@/lib/gee/client';
 import { ForestType } from '@/types/gee';
 import { Prisma } from '@prisma/client';
+import { ZodError } from 'zod';
 
 export const maxDuration = 60; // 60 seconds for GEE analysis
 
@@ -268,6 +269,20 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error('Error creating project:', error);
+
+    // Handle Zod validation errors
+    if (error instanceof ZodError) {
+      const firstError = error.errors[0];
+      return NextResponse.json(
+        {
+          error: 'Validation error',
+          message: firstError.message,
+          field: firstError.path.join('.'),
+          details: error.errors,
+        },
+        { status: 400 }
+      );
+    }
 
     if (error instanceof Error) {
       return NextResponse.json(
