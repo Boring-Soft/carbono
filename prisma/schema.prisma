@@ -19,6 +19,33 @@ enum UserRole {
   SUPERADMIN
 }
 
+enum ProjectType {
+  REDD_PLUS
+  REFORESTATION
+  RENEWABLE_ENERGY
+  REGENERATIVE_AGRICULTURE
+  COMMUNITY_CONSERVATION
+}
+
+enum ProjectStatus {
+  PENDING
+  APPROVED
+  CERTIFIED
+  ACTIVE
+}
+
+enum AlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum AlertStatus {
+  NEW
+  INVESTIGATING
+  RESOLVED
+}
+
 model Profile {
   id            String               @id @default(cuid())
   userId        String               @unique
@@ -32,4 +59,170 @@ model Profile {
 
   @@index([userId])
   @@map("profiles")
+}
+
+model Organization {
+  id              String      @id @default(cuid())
+  name            String
+  type            String      // Community, NGO, Government, Private
+  contactEmail    String?
+  contactPhone    String?
+  address         String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  projects        Project[]
+
+  @@map("organizations")
+}
+
+model Project {
+  id                    String         @id @default(cuid())
+  name                  String         @unique
+  type                  ProjectType
+  description           String?
+  geometry              Json           // GeoJSON polygon
+  areaHectares          Decimal
+  estimatedCo2TonsYear  Decimal?       // Calculado con GEE
+  department            String
+  municipality          String?
+  status                ProjectStatus  @default(PENDING)
+  organizationId        String
+  organization          Organization   @relation(fields: [organizationId], references: [id])
+
+  // Campos adicionales
+  communities           String?        // Comunidades beneficiadas
+  coBenefits            String?        // JSON array
+  startDate             DateTime?
+  durationYears         Int?
+
+  // Metadatos de verificación
+  geeVerified           Boolean        @default(false)
+  geeLastCheck          DateTime?
+  forestCoveragePercent Decimal?       // % de cobertura forestal actual
+
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  createdBy             String?
+  active                Boolean        @default(true)
+
+  documents             ProjectDocument[]
+  carbonCredits         CarbonCredit[]
+  statusHistory         ProjectStatusHistory[]
+
+  @@index([department])
+  @@index([status])
+  @@index([organizationId])
+  @@map("projects")
+}
+
+model ProjectDocument {
+  id          String    @id @default(cuid())
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  fileName    String
+  fileUrl     String    // Supabase Storage URL
+  fileType    String    // PDF, JPG, PNG
+  fileSize    Int       // bytes
+  uploadedBy  String?
+  createdAt   DateTime  @default(now())
+
+  @@index([projectId])
+  @@map("project_documents")
+}
+
+model ProjectStatusHistory {
+  id          String        @id @default(cuid())
+  projectId   String
+  project     Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  fromStatus  ProjectStatus?
+  toStatus    ProjectStatus
+  changedBy   String?
+  notes       String?
+  createdAt   DateTime      @default(now())
+
+  @@index([projectId])
+  @@map("project_status_history")
+}
+
+model CarbonCredit {
+  id                  String    @id @default(cuid())
+  projectId           String
+  project             Project   @relation(fields: [projectId], references: [id])
+  tonsCo2             Decimal
+  verificationDate    DateTime?
+  certificationBody   String?   // Verra, Gold Standard, etc.
+  status              String    @default("pending") // pending, verified, sold
+  pricePerTon         Decimal?
+  createdAt           DateTime  @default(now())
+
+  @@index([projectId])
+  @@map("carbon_credits")
+}
+
+model DeforestationAlert {
+  id            String        @id @default(cuid())
+  latitude      Decimal
+  longitude     Decimal
+  confidence    Int           // 0-100
+  brightness    Decimal?      // Kelvin
+  detectedAt    DateTime
+  department    String?
+  severity      AlertSeverity
+  status        AlertStatus   @default(NEW)
+  notes         String?
+
+  // Relación con proyectos cercanos
+  nearProjectId String?
+  nearProjectDistance Decimal?  // km
+
+  // Análisis de GEE
+  estimatedHectaresLost Decimal?
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([detectedAt])
+  @@index([status])
+  @@index([department])
+  @@map("deforestation_alerts")
+}
+
+model Notification {
+  id          String    @id @default(cuid())
+  userId      String
+  type        String    // deforestation_alert, project_certified, etc.
+  title       String
+  message     String
+  link        String?   // Link a la alerta/proyecto
+  read        Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  @@index([userId, read])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model Report {
+  id          String    @id @default(cuid())
+  type        String    // national, department, project, monthly
+  title       String
+  fileUrl     String    // Supabase Storage
+  generatedBy String?
+  parameters  Json?     // Filtros usados
+  createdAt   DateTime  @default(now())
+
+  @@index([type])
+  @@map("reports")
+}
+
+model ApiCache {
+  id          String    @id @default(cuid())
+  cacheKey    String    @unique
+  data        Json
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+
+  @@index([expiresAt])
+  @@map("api_cache")
 }
