@@ -46,6 +46,11 @@ enum AlertStatus {
   RESOLVED
 }
 
+enum ReportFormat {
+  PDF
+  EXCEL
+}
+
 model Profile {
   id            String               @id @default(cuid())
   userId        String               @unique
@@ -203,17 +208,22 @@ model Notification {
   @@map("notifications")
 }
 
-model Report {
-  id          String    @id @default(cuid())
-  type        String    // national, department, project, monthly
-  title       String
-  fileUrl     String    // Supabase Storage
-  generatedBy String?
-  parameters  Json?     // Filtros usados
-  createdAt   DateTime  @default(now())
+model GeneratedReport {
+  id           String       @id @default(cuid())
+  reportType   String       // NATIONAL, DEPARTMENT, PROJECT, MONTHLY
+  format       ReportFormat
+  title        String
+  fileName     String
+  fileUrl      String       // Supabase Storage
+  fileSizeKb   Int?
+  generatedBy  String?
+  generatedAt  DateTime     @default(now())
+  parameters   Json?        // Filtros usados
+  status       String       @default("completed") // completed, processing, failed
 
-  @@index([type])
-  @@map("reports")
+  @@index([reportType])
+  @@index([generatedAt])
+  @@map("generated_reports")
 }
 
 model ApiCache {

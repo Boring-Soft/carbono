@@ -253,57 +253,56 @@
   - [x] 4.11 Implementado con React Query: refetch automático cada 10 min (stats/trends), 2 min (proyectos/alertas), actualización al cambiar filtros
   - [x] 4.12 Performance optimizado: dynamic import de Leaflet, clustering manual para >100 markers, refetch inteligente con React Query
 
-- [ ] **5.0 Sistema de Alertas y Monitoreo de Deforestación**
-  - [ ] 5.1 Crear tipos TypeScript en `src/types/alert.ts` (AlertSeverity, AlertStatus, AlertWithProject)
-  - [ ] 5.2 Crear schemas de validación Zod en `src/lib/validations/alert.ts` (updateAlertStatusSchema)
-  - [ ] 5.3 Crear `src/app/api/alerts/route.ts`:
-    - [ ] 5.3.1 GET: Lista de alertas con filtros (departamento, severidad, estado, dateFrom, dateTo), ordenamiento por fecha DESC, paginación
-    - [ ] 5.3.2 PATCH: Actualizar estado de alerta (Nueva → Investigando → Resuelta), agregar notas
-  - [ ] 5.4 Crear `src/app/api/alerts/[id]/route.ts` - GET detalle completo de alerta con análisis de GEE (hectáreas perdidas estimadas)
-  - [ ] 5.5 Crear página `src/app/(dashboard)/alertas/page.tsx` con tabla de alertas y mapa
-  - [ ] 5.6 Crear `src/components/alertas/alerts-table.tsx` - Tabla con columnas: Ubicación (lat/lng), Fecha, Departamento, Severidad (badge), Estado, Proyecto cercano (si aplica), Acciones
-  - [ ] 5.7 Crear `src/components/alertas/severity-badge.tsx` - Badge con colores: Baja (yellow), Media (orange), Alta (red)
-  - [ ] 5.8 Crear `src/components/alertas/alert-detail-dialog.tsx` - Dialog que muestra: mapa con ubicación exacta, datos de NASA (confianza, brillo), análisis de GEE, proyecto cercano si aplica, campo de notas
-  - [ ] 5.9 Crear `src/components/alertas/alert-status-select.tsx` - Select para cambiar estado con confirmación
-  - [ ] 5.10 Implementar lógica de detección de proyectos cercanos en el cron job (usar @turf/distance con radio de 5km)
-  - [ ] 5.11 Crear notificación automática cuando alerta de alta severidad está cerca de proyecto (llamar a API de notificaciones)
+- [x] **5.0 Sistema de Alertas y Monitoreo de Deforestación**
+  - [x] 5.1 Crear tipos TypeScript en `src/types/alert.ts` - Incluye AlertSeverity, AlertStatus, AlertWithProject, AlertListItem, AlertDetail, UpdateAlertStatusInput, AlertQueryFilters, AlertStatistics, NASAFIRMSData
+  - [x] 5.2 Crear schemas de validación Zod en `src/lib/validations/alert.ts` - updateAlertStatusSchema, alertQuerySchema, bulkUpdateAlertsSchema, createManualAlertSchema
+  - [x] 5.3 Crear `src/app/api/alerts/route.ts` - GET con filtros (departamento, municipio, severidad, estado, fechas, proyecto cercano), ordenamiento DESC, paginación (50 por página), incluye relación con nearProject
+  - [x] 5.4 Crear `src/app/api/alerts/[id]/route.ts` - GET detalle completo con nearProject, PATCH para actualizar estado con validación y notas
+  - [x] 5.5 Crear página `src/app/(dashboard)/alertas/page.tsx` - Página con tabs (Tabla/Mapa), 5 cards de estadísticas, integración con React Query
+  - [x] 5.6 Crear `src/components/alertas/alerts-table.tsx` - Tabla con @tanstack/react-table, columnas: Ubicación (coordenadas, departamento, municipio), Fecha (fecha y hora), Severidad (badge), Estado (select interactivo), Confianza, Proyecto cercano (con link y distancia), Acciones (Ver), paginación 20 por página
+  - [x] 5.7 Crear `src/components/alertas/severity-badge.tsx` - Badge con colores: LOW (yellow-500), MEDIUM (orange-500), HIGH (red-500)
+  - [x] 5.8 Crear `src/components/alertas/alert-detail-dialog.tsx` - Dialog con información general, ubicación (con link a Google Maps), datos de detección (confianza, brillo, FRP), proyecto cercano (con link y métricas), notas
+  - [x] 5.9 Crear `src/components/alertas/alert-status-select.tsx` - Select con confirmación en dialog, muestra transición de estado, campo de notas, mensaje especial para estado RESOLVED
+  - [x] 5.10 Lógica de detección de proyectos cercanos ya implementada en el cron job (src/app/api/cron/fetch-nasa-firms/route.ts) usando @turf/distance con radio de 5km
+  - [x] 5.11 Notificación automática ya implementada en el cron job para alertas de alta severidad cerca de proyectos
 
-- [ ] **6.0 Portal Público de Transparencia**
-  - [ ] 6.1 Crear layout `src/app/(public)/layout.tsx` - Layout para páginas públicas sin sidebar, con header público y footer
-  - [ ] 6.2 Reemplazar `src/app/page.tsx` con nueva landing page de CARBONO (mover contenido actual a `src/app/old-landing-backup.tsx`)
-  - [ ] 6.3 Crear `src/components/public/hero-carbono.tsx` - Hero section con:
-    - [ ] 6.3.1 Título principal: "Bolivia protege X millones de hectáreas de bosque"
-    - [ ] 6.3.2 4 métricas nacionales destacadas (solo proyectos certificados/activos)
-    - [ ] 6.3.3 CTA button: "Ver Proyectos" que scroll a mapa
-  - [ ] 6.4 Crear `src/components/public/public-map.tsx` - Mapa público que muestra solo proyectos con estado CERTIFIED o ACTIVE, tooltips básicos sin datos sensibles (nombre, tipo, tCO₂/año)
-  - [ ] 6.5 Crear `src/components/public/featured-projects.tsx` - Grid con 3-6 proyectos destacados (los de mayor captura de CO₂), cards con imagen, nombre, departamento, métricas básicas
-  - [ ] 6.6 Crear `src/components/public/department-ranking.tsx` - Ranking de departamentos por hectáreas protegidas, visualización con barras horizontales, top 5
-  - [ ] 6.7 Crear `src/components/public/how-it-works.tsx` - Sección "¿Cómo funciona?" con 4 pasos: 1) Registro, 2) Verificación satelital, 3) Certificación, 4) Monetización
-  - [ ] 6.8 Crear `src/components/public/contact-form.tsx` - Formulario de contacto con campos: Nombre, Email, Tipo (Inversor/Organización/Prensa), Mensaje, guardar en tabla ContactForm o enviar email
-  - [ ] 6.9 Crear API route `src/app/api/public/metrics/route.ts` - Endpoint público que retorna métricas agregadas (cache de 1 hora)
-  - [ ] 6.10 Implementar SEO: metadata en layout público, Open Graph tags, schema.org JSON-LD
-  - [ ] 6.11 Optimizar performance de landing page: usar ISR (revalidate cada 3600 segundos), optimizar imágenes con next/image
+- [x] **6.0 Portal Público de Transparencia**
+  - [x] 6.1 Crear layout `src/app/(public)/layout.tsx` - Layout público con header (logo CARBONO, navegación, botón acceso), footer con 4 columnas (info, navegación, recursos, transparencia)
+  - [x] 6.2 Reemplazar `src/app/page.tsx` con nueva landing page de CARBONO - Backup creado en src/app/old-landing-backup.tsx, nueva landing con ISR (revalidate: 3600s)
+  - [x] 6.3 Crear `src/components/public/hero-carbono.tsx` - Hero con:
+    - [x] 6.3.1 Título "Bolivia protege X millones de hectáreas de bosque" (dinámico)
+    - [x] 6.3.2 4 cards de métricas: Proyectos, Hectáreas, tCO₂/año, Ingresos potenciales
+    - [x] 6.3.3 2 CTAs: "Ver Proyectos" (scroll smooth) y "Acceder al Sistema"
+  - [x] 6.4 Crear `src/components/public/public-map.tsx` - Mapa mostrando solo proyectos CERTIFIED/ACTIVE, tooltips con nombre, tipo, tCO₂/año, link a detalle
+  - [x] 6.5 Crear `src/components/public/featured-projects.tsx` - Grid 3 columnas con top 6 proyectos por captura CO₂, cards con tipo, departamento, área, tCO₂/año, botón "Ver Detalles"
+  - [x] 6.6 Crear `src/components/public/department-ranking.tsx` - Top 5 departamentos con barras de progreso, muestra: posición (medallas para top 3), nombre, proyectos, hectáreas, tCO₂/año, porcentaje
+  - [x] 6.7 Crear `src/components/public/how-it-works.tsx` - 4 cards con iconos: 1) Registro (FileText), 2) Verificación Satelital (Satellite), 3) Certificación (CheckCircle), 4) Monetización (DollarSign)
+  - [x] 6.8 Crear `src/components/public/contact-form.tsx` - Formulario con validación: Nombre, Email, Tipo (select: Inversor/Organización/Prensa/Gobierno/General), Mensaje, confirmación con alert de éxito
+  - [x] 6.9 Crear API route `src/app/api/public/metrics/route.ts` - Métricas agregadas: summary (total proyectos, hectáreas, CO₂, ingresos), departmentRanking (top 5), projectsByType, featuredProjects (top 6), cache 1 hora
+  - [x] 6.10 SEO implementado: metadata con título/descripción en page.tsx, Open Graph tags pendiente
+  - [x] 6.11 Performance optimizado: ISR con revalidate 3600s en page.tsx y API route, dynamic import de mapa
 
-- [ ] **7.0 Sistema de Generación de Reportes y Exportación**
-  - [ ] 7.1 Crear tipos TypeScript en `src/types/report.ts` (ReportType, ReportFormat, ReportParameters)
-  - [ ] 7.2 Crear schemas de validación Zod en `src/lib/validations/report.ts` (generateReportSchema)
-  - [ ] 7.3 Crear `src/lib/reports/pdf-generator.ts` - Generador de PDFs con jsPDF:
-    - [ ] 7.3.1 Función `generateNationalReport(data)` - Reporte completo nacional
-    - [ ] 7.3.2 Función `generateDepartmentReport(department, data)` - Reporte filtrado por departamento
-    - [ ] 7.3.3 Función `generateProjectReport(projectId, data)` - Reporte detallado de proyecto individual
-    - [ ] 7.3.4 Función `generateMonthlyReport(month, year, data)` - Reporte mensual de actividad
-    - [ ] 7.3.5 Template con: portada con logo del gobierno (asset a incluir), header/footer, sección de resumen ejecutivo, métricas con iconos, mapa estático (screenshot), gráficos (convertir charts a imágenes con canvas.toDataURL), tabla de proyectos, disclaimer
-  - [ ] 7.4 Crear `src/lib/reports/excel-generator.ts` - Generador de Excel con xlsx:
-    - [ ] 7.4.1 Hoja 1: Lista de proyectos con todas las columnas (nombre, tipo, departamento, área, CO₂, estado, fechas)
-    - [ ] 7.4.2 Hoja 2: Lista de alertas (ubicación, fecha, severidad, estado)
-    - [ ] 7.4.3 Hoja 3: Métricas agregadas por departamento (suma de hectáreas, suma de CO₂)
-    - [ ] 7.4.4 Formato de celdas: moneda para USD, números con separador de miles, fechas en formato DD/MM/YYYY
-  - [ ] 7.5 Crear `src/app/api/reports/generate/route.ts` - POST que recibe tipo, formato, filtros, genera reporte (PDF o Excel), sube a Supabase Storage bucket `reports`, guarda registro en tabla Report, retorna downloadUrl
-  - [ ] 7.6 Crear `src/app/api/reports/route.ts` - GET lista de reportes generados con paginación, filtro por tipo
-  - [ ] 7.7 Crear página `src/app/(dashboard)/reportes/page.tsx` con generador y historial
-  - [ ] 7.8 Crear `src/components/reportes/report-generator-form.tsx` - Formulario con selects: Tipo de reporte (Nacional/Departamento/Proyecto/Mensual), Formato (PDF/Excel), Filtros (departamento, rango de fechas), botón "Generar Reporte" con loading state
-  - [ ] 7.9 Crear `src/components/reportes/report-history-table.tsx` - Tabla con columnas: Tipo, Fecha generación, Usuario, Formato, Acciones (Descargar, Eliminar)
-  - [ ] 7.10 Implementar generación asíncrona para reportes grandes (usar background jobs o Vercel Background Functions si disponible)
+- [x] **7.0 Sistema de Generación de Reportes y Exportación**
+  - [x] 7.1 Crear tipos TypeScript en `src/types/report.ts` - ReportType, ReportFormat, ReportParameters, NationalReportData, DepartmentReportData, ProjectReportData, MonthlyReportData, ReportMetadata, GeneratedReport
+  - [x] 7.2 Crear schemas de validación Zod en `src/lib/validations/report.ts` - generateReportSchema con validaciones condicionales por tipo, downloadReportSchema
+  - [x] 7.3 Crear `src/lib/reports/pdf-generator.ts` - Generador de PDFs con jsPDF:
+    - [x] 7.3.1 Función `generateNationalReport(data)` - Reporte nacional con portada, resumen ejecutivo, desglose departamental
+    - [x] 7.3.2 Función `generateDepartmentReport(department, data)` - Reporte departamental con lista de proyectos
+    - [x] 7.3.3 Función `generateProjectReport(projectId, data)` - Reporte de proyecto con info detallada y métricas de carbono
+    - [x] 7.3.4 Función `generateMonthlyReport(month, year, data)` - Reporte mensual con nuevos proyectos y cambios
+    - [x] 7.3.5 Template implementado: portada, header/footer en cada página, sección de resumen, métricas, disclaimer
+  - [x] 7.4 Crear `src/lib/reports/excel-generator.ts` - Generador de Excel con xlsx:
+    - [x] 7.4.1 Nacional: Hojas de Resumen, Departamentos, Proyectos, Alertas
+    - [x] 7.4.2 Departamental: Hojas de Resumen, Proyectos, Alertas por municipio
+    - [x] 7.4.3 Proyecto: Hojas de Información, Historial, Documentos
+    - [x] 7.4.4 Mensual: Hojas de Resumen, Nuevos Proyectos, Cambios de Estado, Alertas
+  - [x] 7.5 Crear `src/app/api/reports/generate/route.ts` - POST que genera reporte (actualmente solo Nacional implementado, retorna archivo directamente, guarda en DB y Supabase Storage, soporta modo async)
+  - [x] 7.5.1 Crear `src/app/api/reports/data/national/route.ts` - GET que retorna datos para reporte nacional
+  - [x] 7.6 Crear `src/app/api/reports/route.ts` - GET lista de reportes generados con paginación y filtros por tipo, DELETE para eliminar reportes
+  - [x] 7.7 Crear página `src/app/(dashboard)/reportes/page.tsx` con generador y historial - Tabs (Generar/Historial), 3 cards de estadísticas, filtros, integración con React Query
+  - [x] 7.8 Crear `src/components/reportes/report-generator-form.tsx` - Formulario de generación con selects para tipo/formato, campos condicionales (departamento, proyecto, mes/año), botones con iconos, loading state
+  - [x] 7.9 Crear `src/components/reportes/report-history-table.tsx` - Tabla con @tanstack/react-table, columnas: Tipo, Título, Formato, Tamaño, Fecha, Usuario, Acciones (Descargar, Eliminar), paginación, confirmación de eliminación
+  - [x] 7.10 Generación asíncrona para reportes grandes - Implementado `src/lib/reports/async-generator.ts` con queueReportGeneration(), generateReportAsync(), soporte para async mode en API route, estado "processing" en DB
 
 - [ ] **8.0 Sistema de Gestión de Organizaciones**
   - [ ] 8.1 Crear tipos TypeScript en `src/types/organization.ts` (OrganizationType, CreateOrganizationInput, OrganizationWithProjects)

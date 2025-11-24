@@ -77,7 +77,8 @@ export function LeafletMap({
         mapRef.current = null;
       }
     };
-  }, [center, zoom, satelliteView, onMapReady]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [center, zoom, satelliteView]);
 
   return <div ref={containerRef} id={id} className={className} />;
 }
