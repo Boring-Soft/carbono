@@ -8,7 +8,6 @@ import {
 import { NavGroup } from "./nav-group";
 import { NavUser } from "./nav-user";
 import { TeamSwitcher } from "./team-switcher";
-import { ProSection } from "./pro-section";
 import { sidebarData } from "./data/sidebar-data";
 import type { NavGroupProps } from "./types";
 
@@ -22,9 +21,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {sidebarData.navGroups.map((props: NavGroupProps) => (
           <NavGroup key={props.title} {...props} />
         ))}
-        <div className="mt-auto">
-          <ProSection />
-        </div>
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

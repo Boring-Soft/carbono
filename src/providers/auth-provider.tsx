@@ -99,7 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
 
       if (event === "SIGNED_OUT") {
-        router.push("/sign-in");
+        router.push("/");
       }
     });
 
@@ -141,7 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     setProfile(null);
-    router.push("/sign-in");
+    router.push("/");
   };
 
   return (

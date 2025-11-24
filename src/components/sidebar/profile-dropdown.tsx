@@ -14,11 +14,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useAuth } from "@/providers/auth-provider";
 import { Badge } from "@/components/ui/badge";
 import { UserRole } from "@prisma/client";
 
 export function ProfileDropdown() {
   const { profile, user, isLoading } = useCurrentUser();
+  const { signOut } = useAuth();
 
   if (isLoading) {
     return (
@@ -57,12 +59,12 @@ export function ProfileDropdown() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8 ring-2 ring-primary/10">
+          <Avatar className="h-8 w-8 ring-2 ring-green-600/20">
             <AvatarImage
               src={profile.avatarUrl || ""}
               alt={displayName || user.email || "User"}
             />
-            <AvatarFallback className="bg-primary/10">
+            <AvatarFallback className="bg-green-600/10 text-green-600 font-semibold">
               {getInitials()}
             </AvatarFallback>
           </Avatar>
@@ -87,15 +89,15 @@ export function ProfileDropdown() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link href="/profile">
+            <Link href="/settings/account">
               <User className="mr-2 h-4 w-4" />
-              Profile
+              Mi Perfil
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/settings">
               <Settings className="mr-2 h-4 w-4" />
-              Settings
+              Configuración
             </Link>
           </DropdownMenuItem>
           {profile.role === UserRole.SUPERADMIN && (
@@ -110,12 +112,15 @@ export function ProfileDropdown() {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={async () => {
-            await fetch("/api/auth/signout", { method: "POST" });
-            window.location.href = "/login";
+            try {
+              await signOut();
+            } catch (error) {
+              console.error("Error signing out:", error);
+            }
           }}
         >
           <LogOut className="mr-2 h-4 w-4" />
-          Log out
+          Cerrar Sesión
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

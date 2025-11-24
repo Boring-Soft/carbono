@@ -1,89 +1,61 @@
 import {
   Home,
-  Phone,
-  PhoneCall,
-  TestTube2,
-  Megaphone,
-  Users,
-  MessageSquare,
-  Workflow,
-  Database,
+  Leaf,
+  TreePine,
+  AlertTriangle,
+  Building2,
+  FileText,
   Command,
+  Map,
 } from "lucide-react";
 import type { SidebarData } from "../types";
 
 export const sidebarData: SidebarData = {
   user: {
-    name: "satnaing",
-    email: "satnaingdev@gmail.com",
+    name: "Usuario CARBONO",
+    email: "usuario@carbono.bo",
     avatar: "/avatars/shadcn.jpg",
   },
   teams: [
     {
-      name: "Boring Automation",
-      logo: Command,
-      plan: "Professional",
-    },
-    {
-      name: "My Workspace",
-      logo: Command,
-      plan: "Free",
+      name: "CARBONO Bolivia",
+      logo: Leaf,
+      plan: "Nacional",
     },
   ],
   navGroups: [
     {
-      title: "Main",
+      title: "Principal",
       items: [
         {
-          title: "Home",
-          url: "/dashboard",
+          title: "Dashboard",
+          url: "/dashboard/carbono",
           icon: Home,
         },
         {
-          title: "Voice Agents",
-          icon: Phone,
-          items: [
-            {
-              title: "Agents",
-              url: "/dashboard/voice-agents/agents",
-              icon: PhoneCall,
-            },
-            {
-              title: "Phone Numbers",
-              url: "/dashboard/voice-agents/phone-numbers",
-              icon: Phone,
-            },
-            {
-              title: "Test Numbers",
-              url: "/dashboard/voice-agents/test-numbers",
-              icon: TestTube2,
-            },
-          ],
+          title: "Proyectos",
+          url: "/proyectos",
+          icon: TreePine,
         },
         {
-          title: "Campaigns",
-          url: "/dashboard/campaigns",
-          icon: Megaphone,
+          title: "Alertas",
+          url: "/alertas",
+          icon: AlertTriangle,
         },
         {
-          title: "CRM",
-          url: "/dashboard/crm",
-          icon: Users,
+          title: "Organizaciones",
+          url: "/organizaciones",
+          icon: Building2,
         },
         {
-          title: "Text Agents",
-          url: "/dashboard/text-agents",
-          icon: MessageSquare,
+          title: "Reportes",
+          url: "/reportes",
+          icon: FileText,
         },
         {
-          title: "Flow Studio",
-          url: "/dashboard/flow-studio",
-          icon: Workflow,
-        },
-        {
-          title: "Data Studio",
-          url: "/dashboard/data-studio",
-          icon: Database,
+          title: "Mapa",
+          url: "/dashboard/carbono#mapa",
+          icon: Map,
         },
       ],
     },
