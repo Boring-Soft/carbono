@@ -1,26 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
-import { calculatePolygonArea } from "@/lib/geo/turf-utils";
+import { analyzeArea } from "@/lib/geo/area-analyzer";
 
 /**
  * OSM Elements Analysis API
  *
- * This endpoint analyzes a given polygon geometry to count various elements:
- * - Trees (estimated based on forest density)
- * - Rivers and water bodies
- * - Houses and buildings
- * - Communities and settlements
+ * This endpoint analyzes a given polygon geometry using real OpenStreetMap data:
+ * - Trees (via OSM tags + estimation)
+ * - Rivers and water bodies (Overpass API)
+ * - Houses and buildings (Overpass API)
+ * - Communities and settlements (Overpass API)
  *
- * TODO: Integrate with OpenStreetMap Overpass API for real data
- * Currently using placeholder calculations based on area
+ * Uses Overpass API for real data collection
  */
-
-// Estimation factors per hectare for different elements
-const TREES_PER_HECTARE = 400; // Typical for tropical forest
-const RIVERS_PER_1000_HECTARES = 2;
-const HOUSES_PER_100_HECTARES = 5;
-const COMMUNITIES_PER_10000_HECTARES = 1;
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,34 +35,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid geometry provided" }, { status: 400 });
     }
 
-    // Calculate area
-    const areaHectares = calculatePolygonArea(geometry);
+    // Run comprehensive area analysis with Overpass API
+    const analysisResult = await analyzeArea(geometry, {
+      includeOSM: true,
+      includeForest: false, // Only OSM for this endpoint
+      includeTrees: true,
+    });
 
-    // Estimate elements based on area
-    // TODO: Replace with real Overpass API queries
-    const estimatedTrees = Math.round(areaHectares * TREES_PER_HECTARE * (Math.random() * 0.3 + 0.85)); // ±15% variance
-    const estimatedRivers = Math.max(0, Math.round((areaHectares / 1000) * RIVERS_PER_1000_HECTARES * (Math.random() * 0.5 + 0.75)));
-    const estimatedHouses = Math.round((areaHectares / 100) * HOUSES_PER_100_HECTARES * (Math.random() * 0.4 + 0.8));
-    const estimatedCommunities = Math.max(0, Math.round((areaHectares / 10000) * COMMUNITIES_PER_10000_HECTARES * (Math.random() * 0.6 + 0.7)));
-
-    // Simulate processing delay (Overpass API queries can take time)
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
+    // Return OSM-specific data
     return NextResponse.json({
       success: true,
       data: {
-        areaHectares,
-        trees: estimatedTrees,
-        rivers: estimatedRivers,
-        houses: estimatedHouses,
-        communities: estimatedCommunities,
-        note: "Current data is estimated. Integration with OpenStreetMap Overpass API pending.",
+        areaHectares: analysisResult.areaHectares,
+        trees: analysisResult.trees.estimate,
+        rivers: analysisResult.waterways.total,
+        houses: analysisResult.buildings.total,
+        communities: analysisResult.communities.total,
+        details: {
+          waterways: analysisResult.waterways,
+          buildings: analysisResult.buildings,
+          communities: analysisResult.communities,
+          treeEstimation: analysisResult.trees,
+        },
+        note: "Data sourced from OpenStreetMap via Overpass API",
       },
     });
   } catch (error) {
     console.error("OSM elements analysis error:", error);
     return NextResponse.json(
-      { error: "Error analyzing OSM elements", details: error instanceof Error ? error.message : "Unknown error" },
+      {
+        error: "Error analyzing OSM elements",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }

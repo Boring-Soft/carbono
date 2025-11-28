@@ -120,22 +120,22 @@ Documento generado para implementar los 7 nuevos features de análisis avanzado 
   - [x] 3.7 Integrar NationalForestStats en dashboard principal (`dashboard/carbono/page.tsx`) en nueva sección arriba del mapa
   - [x] 3.8 Agregar botón "Actualizar Datos" que invalida caché y re-consulta GEE (admin only)
 
-- [ ] **4.0 Implementar Análisis Detallado de Áreas (Árboles, Ríos, Casas, Comunidades)**
-  - [ ] 4.1 Crear cliente OpenStreetMap: `osm/overpass-client.ts` con métodos fetchWaterways(), fetchBuildings(), fetchCommunities()
-  - [ ] 4.2 Implementar queries Overpass QL optimizadas para Bolivia (bbox validation, timeout 60s, format JSON)
-  - [ ] 4.3 Crear parser `osm/parser.ts` que extrae data útil: nombres de ríos, tipos de edificios, población de comunidades
-  - [ ] 4.4 Implementar estimación de árboles en `geo/tree-counter.ts` usando GEE tree cover density (formula: area × density × trees_per_pixel)
-  - [ ] 4.5 Crear orquestador `geo/area-analyzer.ts` que ejecuta 4 análisis en paralelo con Promise.all()
-  - [ ] 4.6 Implementar API `/api/analysis/area/route.ts` que recibe polygon, ejecuta area-analyzer, retorna AreaAnalysisResult
-  - [ ] 4.7 Agregar validaciones: polígono dentro de Bolivia, área max 100,000 ha, timeout 60s
-  - [ ] 4.8 Crear types en `types/analysis.ts`: TreeEstimation (min/max/confidence), WaterwayData (rivers/streams/length), BuildingData (total/residential/area), CommunityData (count/names/population)
-  - [ ] 4.9 Implementar componente results `AreaAnalysisResults.tsx` con 4 sections expandibles: 🌳 Árboles, 🌊 Ríos, 🏠 Edificios, 🏘️ Comunidades
-  - [ ] 4.10 Agregar botón "Analizar Área Detalladamente" en project-form después de dibujar polígono
-  - [ ] 4.11 Implementar animación de números con CountUp.js para resultados (45,000 árboles contando de 0 a 45k)
-  - [ ] 4.12 Agregar badges de confianza: Alta (>80%), Media (60-80%), Baja (<60%)
-  - [ ] 4.13 Implementar botón "Descargar Reporte PDF" que genera PDF con todos los datos del análisis
-  - [ ] 4.14 Guardar resultados en DB: agregar campo detailedAnalysis JSON en Project model
-  - [ ] 4.15 Mostrar análisis guardado en ProjectDetailView en nueva sección "Análisis Detallado del Área"
+- [x] **4.0 Implementar Análisis Detallado de Áreas (Árboles, Ríos, Casas, Comunidades)**
+  - [x] 4.1 Crear cliente OpenStreetMap: `osm/overpass-client.ts` con métodos fetchWaterways(), fetchBuildings(), fetchCommunities()
+  - [x] 4.2 Implementar queries Overpass QL optimizadas para Bolivia (bbox validation, timeout 60s, format JSON)
+  - [x] 4.3 Crear parser `osm/parser.ts` que extrae data útil: nombres de ríos, tipos de edificios, población de comunidades
+  - [x] 4.4 Implementar estimación de árboles en `geo/tree-counter.ts` usando GEE tree cover density (formula: area × density × trees_per_pixel)
+  - [x] 4.5 Crear orquestador `geo/area-analyzer.ts` que ejecuta 4 análisis en paralelo con Promise.all()
+  - [x] 4.6 Implementar API `/api/analysis/area/route.ts` que recibe polygon, ejecuta area-analyzer, retorna AreaAnalysisResult
+  - [x] 4.7 Agregar validaciones: polígono dentro de Bolivia, área max 100,000 ha, timeout 60s
+  - [x] 4.8 Crear types en `types/analysis.ts`: TreeEstimation (min/max/confidence), WaterwayData (rivers/streams/length), BuildingData (total/residential/area), CommunityData (count/names/population)
+  - [x] 4.9 Implementar componente results `AreaAnalysisResults.tsx` con 4 sections expandibles: 🌳 Árboles, 🌊 Ríos, 🏠 Edificios, 🏘️ Comunidades
+  - [x] 4.10 Agregar botón "Analizar Área Detalladamente" en project-form después de dibujar polígono
+  - [x] 4.11 Implementar animación de números con CountUp.js para resultados (45,000 árboles contando de 0 a 45k)
+  - [x] 4.12 Agregar badges de confianza: Alta (>80%), Media (60-80%), Baja (<60%)
+  - [x] 4.13 Implementar botón "Descargar Reporte PDF" que genera PDF con todos los datos del análisis
+  - [x] 4.14 Guardar resultados en DB: agregar campo detailedAnalysis JSON en Project model
+  - [x] 4.15 Mostrar análisis guardado en ProjectDetailView en nueva sección "Análisis Detallado del Área"
 
 - [ ] **5.0 Implementar Auto-Delimitación de Áreas de Bosque (Snap to Forest)**
   - [ ] 5.1 Crear función GEE en `gee/client.ts`: `snapPolygonToForest(polygon, threshold)` que retorna polígono ajustado
