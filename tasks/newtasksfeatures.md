@@ -137,16 +137,16 @@ Documento generado para implementar los 7 nuevos features de análisis avanzado 
   - [x] 4.14 Guardar resultados en DB: agregar campo detailedAnalysis JSON en Project model
   - [x] 4.15 Mostrar análisis guardado en ProjectDetailView en nueva sección "Análisis Detallado del Área"
 
-- [ ] **5.0 Implementar Auto-Delimitación de Áreas de Bosque (Snap to Forest)**
-  - [ ] 5.1 Crear función GEE en `gee/client.ts`: `snapPolygonToForest(polygon, threshold)` que retorna polígono ajustado
-  - [ ] 5.2 Implementar vectorización de raster de cobertura forestal usando reduceToVectors() en Earth Engine
-  - [ ] 5.3 Configurar parámetros de vectorización: scale 30m, geometryType polygon, maxPixels 1e10
-  - [ ] 5.4 Implementar simplificación de geometrías complejas con tolerance 50m para reducir vértices
-  - [ ] 5.5 Crear API route `/api/gee/snap-to-forest/route.ts` que recibe polygon original y threshold
-  - [ ] 5.6 Implementar lógica de intersección usando Turf.js entre polígono original y forest mask
-  - [ ] 5.7 Agregar botón "Ajustar a Límites de Bosque" en project-form que aparece después de dibujar
-  - [ ] 5.8 Implementar visualización before/after: polígono original en rojo translúcido, ajustado en verde sólido
-  - [ ] 5.9 Mostrar stats de ajuste: "Ajustado de 1,230 ha → 1,187 ha (bosque real). Excluidas: 43 ha de áreas no boscosas"
+- [x] **5.0 Implementar Auto-Delimitación de Áreas de Bosque (Snap to Forest)**
+  - [x] 5.1 Crear función GEE en `gee/client.ts`: `snapPolygonToForest(polygon, threshold)` que retorna polígono ajustado
+  - [x] 5.2 Implementar vectorización de raster de cobertura forestal usando reduceToVectors() en Earth Engine
+  - [x] 5.3 Configurar parámetros de vectorización: scale 30m, geometryType polygon, maxPixels 1e10
+  - [x] 5.4 Implementar simplificación de geometrías complejas con tolerance 50m para reducir vértices
+  - [x] 5.5 Crear API route `/api/gee/snap-to-forest/route.ts` que recibe polygon original y threshold
+  - [x] 5.6 Implementar lógica de intersección usando Turf.js entre polígono original y forest mask
+  - [x] 5.7 Agregar botón "Ajustar a Límites de Bosque" en project-form que aparece después de dibujar
+  - [x] 5.8 Implementar visualización before/after: polígono original en rojo translúcido, ajustado en verde sólido
+  - [x] 5.9 Mostrar stats de ajuste: "Ajustado de 1,230 ha → 1,187 ha (bosque real). Excluidas: 43 ha de áreas no boscosas"
 
 - [ ] **6.0 Implementar Filtrado Exclusivo de Zonas Boscosas (Forest Mask Filter)**
   - [ ] 6.1 Crear API route `/api/gee/forest-mask/route.ts` que retorna solo polígonos de bosque dentro del área seleccionada
