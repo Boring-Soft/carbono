@@ -101,14 +101,14 @@ Documento generado para implementar los 7 nuevos features de análisis avanzado 
   - [x] 1.5 Agregar toggle satélite en dashboard map (`carbon-map.tsx`) con persistencia en localStorage
   - [x] 1.6 Actualizar `next.config.js` para permitir dominios de tiles: server.arcgisonline.com, mt0-3.google.com, api.mapbox.com
 
-- [ ] **2.0 Implementar Sistema de Loader Inteligente con Progreso**
-  - [ ] 2.1 Crear hook custom `useAreaAnalysis()` que maneja estados: idle, analyzing, success, error
-  - [ ] 2.2 Implementar componente `AreaAnalysisLoader.tsx` con progress bar multi-stage (5 stages: forest, buildings, waterways, communities, report)
-  - [ ] 2.3 Crear componente `AreaAnalysisResults.tsx` - Dialog modal con animated cards para cada métrica (trees, buildings, rivers, communities)
-  - [ ] 2.4 Integrar Framer Motion para animaciones: progress bar, número contador animado (AnimatedNumber), fade-in de results
-  - [ ] 2.5 Implementar estimación de tiempo por stage basado en área del polígono (formula: baseTime + (area * factor))
-  - [ ] 2.6 Agregar estados de error con mensajes específicos y botón "Reintentar"
-  - [ ] 2.7 Implementar toast notifications con Sonner: inicio de análisis, error, éxito con link a resultados
+- [x] **2.0 Implementar Sistema de Loader Inteligente con Progreso**
+  - [x] 2.1 Crear hook custom `useAreaAnalysis()` que maneja estados: idle, analyzing, success, error
+  - [x] 2.2 Implementar componente `AreaAnalysisLoader.tsx` con progress bar multi-stage (5 stages: forest, buildings, waterways, communities, report)
+  - [x] 2.3 Crear componente `AreaAnalysisResults.tsx` - Dialog modal con animated cards para cada métrica (trees, buildings, rivers, communities)
+  - [x] 2.4 Integrar Framer Motion para animaciones: progress bar, número contador animado (AnimatedNumber), fade-in de results
+  - [x] 2.5 Implementar estimación de tiempo por stage basado en área del polígono (formula: baseTime + (area * factor))
+  - [x] 2.6 Agregar estados de error con mensajes específicos y botón "Reintentar"
+  - [x] 2.7 Implementar toast notifications con Sonner: inicio de análisis, error, éxito con link a resultados
 
 - [ ] **3.0 Implementar Dashboard Nacional de Inventario Forestal**
   - [ ] 3.1 Crear API route `/api/national/forest-stats/route.ts` que consulta GEE con Hansen dataset para Bolivia completa

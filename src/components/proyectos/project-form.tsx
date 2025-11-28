@@ -24,6 +24,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { CarbonPreview } from "./carbon-preview";
 import { CreateOrganizationDialog } from "../organizaciones/create-organization-dialog";
+import { AreaAnalysisLoader } from "@/components/maps/area-analysis-loader";
+import { useAreaAnalysis } from "@/hooks/use-area-analysis";
 
 // Dynamically import ProjectMapDrawer to avoid SSR issues with Leaflet
 const ProjectMapDrawer = dynamic(
@@ -44,6 +46,7 @@ import {
   Loader2,
   MapPin,
   AlertTriangle,
+  Sparkles,
 } from "lucide-react";
 import { ProjectType } from "@prisma/client";
 import { calculatePolygonArea } from "@/lib/geo/turf-utils";
@@ -117,6 +120,24 @@ export function ProjectForm({ organizations }: ProjectFormProps) {
     resolver: zodResolver(projectFormSchema),
     defaultValues: {
       coBenefits: [],
+    },
+  });
+
+  // Area analysis hook
+  const {
+    analyze,
+    cancel: cancelAnalysis,
+    retry: retryAnalysis,
+    progress: analysisProgress,
+    result: analysisResult,
+    isAnalyzing,
+  } = useAreaAnalysis({
+    onSuccess: (result) => {
+      toast.success("Análisis completado exitosamente");
+      console.log("Analysis result:", result);
+    },
+    onError: (error) => {
+      toast.error(`Error en el análisis: ${error.message}`);
     },
   });
 
@@ -360,29 +381,108 @@ export function ProjectForm({ organizations }: ProjectFormProps) {
                 <div className="space-y-2">
                   <Label>Área del Proyecto *</Label>
                   {geometry ? (
-                    <div className="p-4 border rounded-lg bg-green-50 border-green-200">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-5 w-5 text-green-700" />
-                          <div>
-                            <p className="font-medium text-green-900">Área definida</p>
-                            <p className="text-sm text-green-700">
-                              {calculatePolygonArea(geometry).toLocaleString("es-BO", {
-                                maximumFractionDigits: 2,
-                              })}{" "}
-                              hectáreas
-                            </p>
+                    <div className="space-y-3">
+                      <div className="p-4 border rounded-lg bg-green-50 border-green-200">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-5 w-5 text-green-700" />
+                            <div>
+                              <p className="font-medium text-green-900">Área definida</p>
+                              <p className="text-sm text-green-700">
+                                {calculatePolygonArea(geometry).toLocaleString("es-BO", {
+                                  maximumFractionDigits: 2,
+                                })}{" "}
+                                hectáreas
+                              </p>
+                            </div>
                           </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setIsMapDrawerOpen(true)}
+                          >
+                            Editar
+                          </Button>
                         </div>
+                      </div>
+
+                      {/* Analyze Area Button */}
+                      {!isAnalyzing && !analysisResult && (
                         <Button
                           type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setIsMapDrawerOpen(true)}
+                          variant="secondary"
+                          className="w-full"
+                          onClick={() => analyze(geometry)}
                         >
-                          Editar
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          Analizar Área Detalladamente
                         </Button>
-                      </div>
+                      )}
+
+                      {/* Analysis Loader */}
+                      {analysisProgress && (
+                        <AreaAnalysisLoader
+                          progress={analysisProgress}
+                          onCancel={cancelAnalysis}
+                          onRetry={retryAnalysis}
+                        />
+                      )}
+
+                      {/* Analysis Results Summary */}
+                      {analysisResult && !isAnalyzing && (
+                        <Card className="border-green-200">
+                          <CardContent className="pt-4">
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <p className="text-sm font-medium">Resultados del Análisis</p>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => analyze(geometry)}
+                                >
+                                  <Sparkles className="h-3 w-3 mr-1" />
+                                  Analizar de nuevo
+                                </Button>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                  <p className="text-muted-foreground">Cobertura forestal</p>
+                                  <p className="font-medium">
+                                    {analysisResult.forestCoveragePercent.toFixed(1)}%
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">Área de bosque</p>
+                                  <p className="font-medium">
+                                    {analysisResult.forestAreaHectares.toLocaleString("es-BO", {
+                                      maximumFractionDigits: 1,
+                                    })}{" "}
+                                    ha
+                                  </p>
+                                </div>
+                                {analysisResult.trees && (
+                                  <div>
+                                    <p className="text-muted-foreground">Árboles estimados</p>
+                                    <p className="font-medium">
+                                      {analysisResult.trees.toLocaleString("es-BO")}
+                                    </p>
+                                  </div>
+                                )}
+                                {analysisResult.communities && (
+                                  <div>
+                                    <p className="text-muted-foreground">Comunidades</p>
+                                    <p className="font-medium">
+                                      {analysisResult.communities.toLocaleString("es-BO")}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
                     </div>
                   ) : (
                     <Button
