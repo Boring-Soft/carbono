@@ -110,15 +110,15 @@ Documento generado para implementar los 7 nuevos features de análisis avanzado 
   - [x] 2.6 Agregar estados de error con mensajes específicos y botón "Reintentar"
   - [x] 2.7 Implementar toast notifications con Sonner: inicio de análisis, error, éxito con link a resultados
 
-- [ ] **3.0 Implementar Dashboard Nacional de Inventario Forestal**
-  - [ ] 3.1 Crear API route `/api/national/forest-stats/route.ts` que consulta GEE con Hansen dataset para Bolivia completa
-  - [ ] 3.2 Implementar función en `gee/client.ts`: `getNationalForestStats()` que calcula hectáreas por departamento
-  - [ ] 3.3 Configurar caché de resultados usando ApiCache model (24 horas de expiración)
-  - [ ] 3.4 Crear componente `NationalForestStats.tsx` con 4 stat cards: Total Bosques, Cobertura %, Pérdida Anual, Departamento Líder
-  - [ ] 3.5 Implementar gráfico de barras con Recharts: hectáreas de bosque por departamento (9 departamentos)
-  - [ ] 3.6 Crear gráfico de líneas: tendencia histórica 2000-2023 usando Hansen loss data
-  - [ ] 3.7 Integrar NationalForestStats en dashboard principal (`dashboard/carbono/page.tsx`) en nueva sección arriba del mapa
-  - [ ] 3.8 Agregar botón "Actualizar Datos" que invalida caché y re-consulta GEE (admin only)
+- [x] **3.0 Implementar Dashboard Nacional de Inventario Forestal**
+  - [x] 3.1 Crear API route `/api/national/forest-stats/route.ts` que consulta GEE con Hansen dataset para Bolivia completa
+  - [x] 3.2 Implementar función en `gee/client.ts`: `getNationalForestStats()` que calcula hectáreas por departamento
+  - [x] 3.3 Configurar caché de resultados usando ApiCache model (24 horas de expiración)
+  - [x] 3.4 Crear componente `NationalForestStats.tsx` con 4 stat cards: Total Bosques, Cobertura %, Pérdida Anual, Departamento Líder
+  - [x] 3.5 Implementar gráfico de barras con Recharts: hectáreas de bosque por departamento (9 departamentos)
+  - [x] 3.6 Crear gráfico de líneas: tendencia histórica 2000-2023 usando Hansen loss data
+  - [x] 3.7 Integrar NationalForestStats en dashboard principal (`dashboard/carbono/page.tsx`) en nueva sección arriba del mapa
+  - [x] 3.8 Agregar botón "Actualizar Datos" que invalida caché y re-consulta GEE (admin only)
 
 - [ ] **4.0 Implementar Análisis Detallado de Áreas (Árboles, Ríos, Casas, Comunidades)**
   - [ ] 4.1 Crear cliente OpenStreetMap: `osm/overpass-client.ts` con métodos fetchWaterways(), fetchBuildings(), fetchCommunities()

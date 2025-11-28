@@ -7,6 +7,7 @@ import { StatsCards } from "@/components/dashboard/carbono/stats-cards";
 import { MapControls } from "@/components/dashboard/carbono/map-controls";
 import { FiltersBar, DashboardFilters } from "@/components/dashboard/carbono/filters-bar";
 import { TrendCharts } from "@/components/dashboard/carbono/trend-charts";
+import { NationalForestStats } from "@/components/dashboard/carbono/national-forest-stats";
 import { SatelliteLayerControl, MapViewMode } from "@/components/maps/satellite-layer-control";
 import { ProjectMarkerData } from "@/components/maps/project-marker";
 import { AlertMarkerData } from "@/components/maps/alert-marker";
@@ -174,6 +175,9 @@ export default function DashboardCarbonoPage() {
 
       {/* Stats Cards */}
       <StatsCards stats={stats} isLoading={statsLoading} />
+
+      {/* National Forest Stats */}
+      <NationalForestStats />
 
       {/* Filters */}
       <FiltersBar filters={filters} onFiltersChange={setFilters} />
