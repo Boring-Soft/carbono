@@ -12,11 +12,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MapPin, Trash2, Check, AlertTriangle } from "lucide-react";
+import { SatelliteLayerControl, MapViewMode } from "@/components/maps/satellite-layer-control";
+import { TILE_LAYERS } from "@/components/maps/leaflet-map";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import "leaflet-draw";
 import { calculatePolygonArea, isPolygonInBolivia } from "@/lib/geo/turf-utils";
+import { toast } from "sonner";
 
 interface ProjectMapDrawerProps {
   open: boolean;
@@ -40,12 +43,14 @@ export function ProjectMapDrawer({
 }: ProjectMapDrawerProps) {
   const mapRef = useRef<L.Map | null>(null);
   const drawnItemsRef = useRef<L.FeatureGroup | null>(null);
+  const currentTileLayerRef = useRef<L.TileLayer | null>(null);
   const [currentPolygon, setCurrentPolygon] = useState<GeoJSON.Polygon | null>(
     initialGeometry || null
   );
   const [areaHectares, setAreaHectares] = useState<number | null>(null);
   const [isValid, setIsValid] = useState(true);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<MapViewMode>("street");
 
   useEffect(() => {
     if (!open) return;
@@ -65,12 +70,14 @@ export function ProjectMapDrawer({
 
       mapRef.current = map;
 
-      // Add tile layer
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19,
-      }).addTo(map);
+      // Add initial tile layer (street view)
+      const layerConfig = TILE_LAYERS.street;
+      const tileLayer = L.tileLayer(layerConfig.url, {
+        attribution: layerConfig.attribution,
+        maxZoom: layerConfig.maxZoom,
+      });
+      tileLayer.addTo(map);
+      currentTileLayerRef.current = tileLayer;
 
       // Initialize feature group for drawn items
       const drawnItems = new L.FeatureGroup();
@@ -106,6 +113,14 @@ export function ProjectMapDrawer({
         },
       });
       map.addControl(drawControl);
+
+      // Auto-switch to satellite view when drawing starts
+      map.on(L.Draw.Event.DRAWSTART, () => {
+        if (viewMode !== "satellite") {
+          setViewMode("satellite");
+          toast.info("Vista satélite activada para mejor precisión");
+        }
+      });
 
       // Handle drawn shapes
       map.on(L.Draw.Event.CREATED, (e) => {
@@ -152,7 +167,25 @@ export function ProjectMapDrawer({
         mapRef.current = null;
       }
     };
-  }, [open, initialGeometry]);
+  }, [open, initialGeometry, viewMode]);
+
+  // Handle view mode changes dynamically
+  useEffect(() => {
+    if (!mapRef.current || !currentTileLayerRef.current) return;
+
+    // Remove current tile layer
+    mapRef.current.removeLayer(currentTileLayerRef.current);
+
+    // Add new tile layer based on view mode
+    const layerConfig = viewMode === "satellite" ? TILE_LAYERS.satellite : TILE_LAYERS.street;
+    const newTileLayer = L.tileLayer(layerConfig.url, {
+      attribution: layerConfig.attribution,
+      maxZoom: layerConfig.maxZoom,
+      subdomains: layerConfig.subdomains,
+    });
+    newTileLayer.addTo(mapRef.current);
+    currentTileLayerRef.current = newTileLayer;
+  }, [viewMode]);
 
   const handleLayerCreated = (layer: L.Layer) => {
     const geoJson = (layer as L.Polygon | L.Rectangle).toGeoJSON();
@@ -261,10 +294,18 @@ export function ProjectMapDrawer({
             </AlertDescription>
           </Alert>
 
+          {/* Satellite Layer Control */}
+          <div className="flex justify-end">
+            <SatelliteLayerControl
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+            />
+          </div>
+
           {/* Map container */}
           <div
             id="map-container"
-            className="w-full h-[500px] border rounded-lg"
+            className="w-full h-[500px] border rounded-lg relative"
           />
 
           {/* Actions */}

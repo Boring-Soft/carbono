@@ -2,9 +2,19 @@
 const nextConfig = {
   images: {
     domains: [
-      // Add your Supabase project domain
+      // Supabase domains
       "swfgvfhpmicwptupjyko.supabase.co",
       "xqakfzhkeiongvzgbhji.supabase.co",
+      // Map tile providers
+      "server.arcgisonline.com",
+      "mt0.google.com",
+      "mt1.google.com",
+      "mt2.google.com",
+      "mt3.google.com",
+      "api.mapbox.com",
+      "a.tile.openstreetmap.org",
+      "b.tile.openstreetmap.org",
+      "c.tile.openstreetmap.org",
     ],
   },
   // output: "standalone", // Commented out for Vercel deployment
@@ -53,7 +63,7 @@ const nextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.supabase.co https://* blob:; font-src 'self' data:; frame-src 'self' https://js.stripe.com; object-src 'none'",
+              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://server.arcgisonline.com https://*.google.com https://api.mapbox.com https://*.tile.openstreetmap.org; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.supabase.co https://server.arcgisonline.com https://*.google.com https://api.mapbox.com https://*.tile.openstreetmap.org https://* blob:; font-src 'self' data:; frame-src 'self' https://js.stripe.com; object-src 'none'",
           },
         ],
       },

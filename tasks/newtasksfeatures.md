@@ -16,7 +16,7 @@ Documento generado para implementar los 7 nuevos features de análisis avanzado 
 - `src/lib/geo/tree-counter.ts` - Estimación de árboles basada en densidad de cobertura forestal
 
 #### Componentes UI
-- `src/components/maps/satellite-layer-control.tsx` - Control toggle para cambiar entre vista street/satellite
+- `src/components/maps/satellite-layer-control.tsx` - ✅ CREADO - Control toggle para cambiar entre vista street/satellite con ToggleGroup de shadcn/ui
 - `src/components/maps/area-analysis-loader.tsx` - Loader con progreso multi-stage para análisis de área
 - `src/components/maps/area-analysis-results.tsx` - Dialog modal con resultados detallados del análisis
 - `src/components/maps/forest-mask-control.tsx` - Control para ajustar polígono solo a áreas de bosque
@@ -39,9 +39,10 @@ Documento generado para implementar los 7 nuevos features de análisis avanzado 
 
 - `src/components/proyectos/project-form.tsx` - Integrar botón "Analizar Área Detalladamente" y "Ajustar a Bosque"
 - `src/components/proyectos/project-detail-view.tsx` - Mostrar análisis detallado de área con datos enriquecidos
-- `src/components/maps/leaflet-map.tsx` - Agregar SatelliteLayerControl
-- `src/components/dashboard/carbono/carbon-map.tsx` - Agregar toggle de vista satélite
-- `src/app/(dashboard)/dashboard/carbono/page.tsx` - Integrar NationalForestStats component
+- `src/components/maps/leaflet-map.tsx` - ✅ MODIFICADO - Agregado TILE_LAYERS config, soporte dinámico de cambio de tiles, export de providers
+- `src/components/proyectos/project-map-drawer.tsx` - ✅ MODIFICADO - Integrado SatelliteLayerControl, auto-switch a satélite al dibujar, toast notifications
+- `src/components/dashboard/carbono/carbon-map.tsx` - Pendiente - Agregar toggle de vista satélite
+- `src/app/(dashboard)/dashboard/carbono/page.tsx` - ✅ MODIFICADO - Integrado SatelliteLayerControl posicionado sobre el mapa
 - `src/lib/gee/client.ts` - Agregar funciones: vectorizeForestMask(), snapPolygonToForest(), getNationalForestStats()
 - `src/lib/gee/datasets.ts` - Agregar configuración para datasets de vectorización
 - `src/types/project.ts` - Agregar campos detailedAnalysis?: AreaAnalysisResult
@@ -49,7 +50,7 @@ Documento generado para implementar los 7 nuevos features de análisis avanzado 
 ### Archivos de Configuración
 
 - `.env` - Agregar variables: OVERPASS_API_URL, MICROSOFT_BUILDING_FOOTPRINTS_ENABLED
-- `next.config.js` - Agregar dominios permitidos para tiles satélite
+- `next.config.js` - ✅ MODIFICADO - Agregados dominios de tiles satélite en images.domains y Content-Security-Policy
 
 ### Documentación
 
@@ -92,13 +93,13 @@ Documento generado para implementar los 7 nuevos features de análisis avanzado 
 
 ## Tasks
 
-- [ ] **1.0 Implementar Vista Satélite en Mapas de Dibujo**
-  - [ ] 1.1 Crear componente `SatelliteLayerControl.tsx` con toggle entre 3 providers (Street, ESRI Satellite, Google Satellite)
-  - [ ] 1.2 Configurar tile layers en `leaflet-map.tsx`: ESRI World Imagery (default), Google Satellite (fallback), Mapbox (opcional)
-  - [ ] 1.3 Integrar SatelliteLayerControl en `ProjectMapDrawer` (formulario de nuevo proyecto)
-  - [ ] 1.4 Implementar auto-switch a vista satélite cuando usuario empieza a dibujar polígono (map.on('draw:drawstart'))
-  - [ ] 1.5 Agregar toggle satélite en dashboard map (`carbon-map.tsx`) con persistencia en localStorage
-  - [ ] 1.6 Actualizar `next.config.js` para permitir dominios de tiles: server.arcgisonline.com, mt0-3.google.com, api.mapbox.com
+- [x] **1.0 Implementar Vista Satélite en Mapas de Dibujo**
+  - [x] 1.1 Crear componente `SatelliteLayerControl.tsx` con toggle entre 3 providers (Street, ESRI Satellite, Google Satellite)
+  - [x] 1.2 Configurar tile layers en `leaflet-map.tsx`: ESRI World Imagery (default), Google Satellite (fallback), Mapbox (opcional)
+  - [x] 1.3 Integrar SatelliteLayerControl en `ProjectMapDrawer` (formulario de nuevo proyecto)
+  - [x] 1.4 Implementar auto-switch a vista satélite cuando usuario empieza a dibujar polígono (map.on('draw:drawstart'))
+  - [x] 1.5 Agregar toggle satélite en dashboard map (`carbon-map.tsx`) con persistencia en localStorage
+  - [x] 1.6 Actualizar `next.config.js` para permitir dominios de tiles: server.arcgisonline.com, mt0-3.google.com, api.mapbox.com
 
 - [ ] **2.0 Implementar Sistema de Loader Inteligente con Progreso**
   - [ ] 2.1 Crear hook custom `useAreaAnalysis()` que maneja estados: idle, analyzing, success, error

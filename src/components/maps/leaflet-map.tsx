@@ -11,6 +11,28 @@ const BOLIVIA_BOUNDS: [[number, number], [number, number]] = [
   [-10, -58],
 ];
 
+// Tile layer configurations
+export const TILE_LAYERS = {
+  street: {
+    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+  },
+  satellite: {
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    attribution:
+      "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+    maxZoom: 19,
+  },
+  satelliteGoogle: {
+    url: "http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+    attribution: "&copy; Google",
+    maxZoom: 20,
+    subdomains: ["mt0", "mt1", "mt2", "mt3"],
+  },
+};
+
 interface LeafletMapProps {
   onMapReady?: (map: L.Map) => void;
   center?: [number, number];
@@ -30,6 +52,7 @@ export function LeafletMap({
 }: LeafletMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const currentLayerRef = useRef<L.TileLayer | null>(null);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -45,25 +68,15 @@ export function LeafletMap({
 
     mapRef.current = map;
 
-    // Add tile layer based on view type
-    if (satelliteView) {
-      // Satellite view using Esri World Imagery
-      L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        {
-          attribution:
-            "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
-          maxZoom: 19,
-        }
-      ).addTo(map);
-    } else {
-      // Standard OpenStreetMap view
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19,
-      }).addTo(map);
-    }
+    // Add initial tile layer
+    const layerConfig = satelliteView ? TILE_LAYERS.satellite : TILE_LAYERS.street;
+    const tileLayer = L.tileLayer(layerConfig.url, {
+      attribution: layerConfig.attribution,
+      maxZoom: layerConfig.maxZoom,
+      subdomains: layerConfig.subdomains,
+    });
+    tileLayer.addTo(map);
+    currentLayerRef.current = tileLayer;
 
     // Call onMapReady callback
     if (onMapReady) {
@@ -78,7 +91,25 @@ export function LeafletMap({
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [center, zoom, satelliteView]);
+  }, [center, zoom]);
+
+  // Handle view mode changes dynamically
+  useEffect(() => {
+    if (!mapRef.current || !currentLayerRef.current) return;
+
+    // Remove current layer
+    mapRef.current.removeLayer(currentLayerRef.current);
+
+    // Add new layer based on view mode
+    const layerConfig = satelliteView ? TILE_LAYERS.satellite : TILE_LAYERS.street;
+    const newTileLayer = L.tileLayer(layerConfig.url, {
+      attribution: layerConfig.attribution,
+      maxZoom: layerConfig.maxZoom,
+      subdomains: layerConfig.subdomains,
+    });
+    newTileLayer.addTo(mapRef.current);
+    currentLayerRef.current = newTileLayer;
+  }, [satelliteView]);
 
   return <div ref={containerRef} id={id} className={className} />;
 }
