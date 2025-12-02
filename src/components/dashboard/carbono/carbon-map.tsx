@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { createProjectMarker, ProjectMarkerData } from "@/components/maps/project-marker";
 import { createAlertMarker, AlertMarkerData } from "@/components/maps/alert-marker";
+import { useForestBoundaries } from "@/hooks/use-forest-boundaries";
 
 // Dynamic import to avoid SSR issues
 const LeafletMap = dynamic(
@@ -26,6 +27,7 @@ interface CarbonMapProps {
   alerts: AlertMarkerData[];
   showProjects?: boolean;
   showAlerts?: boolean;
+  showForestBoundaries?: boolean;
   satelliteView?: boolean;
   className?: string;
 }
@@ -35,12 +37,25 @@ export function CarbonMap({
   alerts,
   showProjects = true,
   showAlerts = true,
+  showForestBoundaries = true,
   satelliteView = false,
   className = "w-full h-[600px]",
 }: CarbonMapProps) {
   const [map, setMap] = useState<L.Map | null>(null);
   const projectLayerRef = useRef<L.LayerGroup | null>(null);
   const alertLayerRef = useRef<L.LayerGroup | null>(null);
+
+  // Add forest boundaries layer with thick black borders
+  useForestBoundaries({
+    map,
+    enabled: showForestBoundaries,
+    style: {
+      color: "#000000",
+      weight: 4,
+      opacity: 1,
+      fillOpacity: 0,
+    },
+  });
 
   // Initialize layers when map is ready
   const handleMapReady = (mapInstance: L.Map) => {

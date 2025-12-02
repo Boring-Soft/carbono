@@ -137,7 +137,7 @@ export async function analyzeArea(
       other: buildingsParsed.other,
       list: buildingsParsed.buildings.map((b) => ({
         ...b,
-        category: categorizeBu ilding(b.buildingType),
+        category: categorizeBuilding(b.buildingType),
       })),
       density: buildingsParsed.totalBuildings / areaHectares,
     };

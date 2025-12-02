@@ -12,7 +12,14 @@ const BOLIVIA_BOUNDS: [[number, number], [number, number]] = [
 ];
 
 // Tile layer configurations
-export const TILE_LAYERS = {
+type TileLayerConfig = {
+  url: string;
+  attribution: string;
+  maxZoom: number;
+  subdomains?: string[];
+};
+
+export const TILE_LAYERS: Record<string, TileLayerConfig> = {
   street: {
     url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     attribution:
@@ -26,7 +33,7 @@ export const TILE_LAYERS = {
     maxZoom: 19,
   },
   satelliteGoogle: {
-    url: "http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+    url: "https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
     attribution: "&copy; Google",
     maxZoom: 20,
     subdomains: ["mt0", "mt1", "mt2", "mt3"],
@@ -73,7 +80,7 @@ export function LeafletMap({
     const tileLayer = L.tileLayer(layerConfig.url, {
       attribution: layerConfig.attribution,
       maxZoom: layerConfig.maxZoom,
-      subdomains: layerConfig.subdomains,
+      ...(layerConfig.subdomains && { subdomains: layerConfig.subdomains }),
     });
     tileLayer.addTo(map);
     currentLayerRef.current = tileLayer;
@@ -105,7 +112,7 @@ export function LeafletMap({
     const newTileLayer = L.tileLayer(layerConfig.url, {
       attribution: layerConfig.attribution,
       maxZoom: layerConfig.maxZoom,
-      subdomains: layerConfig.subdomains,
+      ...(layerConfig.subdomains && { subdomains: layerConfig.subdomains }),
     });
     newTileLayer.addTo(mapRef.current);
     currentLayerRef.current = newTileLayer;

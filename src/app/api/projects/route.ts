@@ -9,7 +9,7 @@ import { prisma } from '@/lib/prisma';
 import { createProjectSchema, projectQuerySchema } from '@/lib/validations/project';
 import { calculatePolygonArea, validatePolygon } from '@/lib/geo/turf-utils';
 import { calculateCarbonCapture } from '@/lib/carbon/calculator';
-import { analyzeArea } from '@/lib/gee/client';
+import { analyzeForestCoverage } from '@/lib/gee/client';
 import { ForestType } from '@/types/gee';
 import { Prisma } from '@prisma/client';
 import { ZodError } from 'zod';
@@ -183,23 +183,27 @@ export async function POST(request: NextRequest) {
 
     // 4. Analyze area with Google Earth Engine
     console.log('🛰️ Analyzing area with GEE...');
-    let geeAnalysis;
+    let forestCoverage;
     try {
-      geeAnalysis = await analyzeArea(input.geometry);
+      forestCoverage = await analyzeForestCoverage(input.geometry);
       console.log('✓ GEE analysis completed');
     } catch (geeError) {
       console.error('GEE analysis failed:', geeError);
       // Continue without GEE data (will use IPCC factors as fallback)
-      geeAnalysis = null;
+      forestCoverage = null;
     }
 
     // 5. Calculate carbon capture
-    const forestType: ForestType = geeAnalysis?.forestType || ForestType.UNKNOWN;
+    const forestType: ForestType = ForestType.TROPICAL; // Default for Bolivia
+    const biomassPerHectare = forestCoverage
+      ? (forestCoverage.treeCoverDensity / 100) * 200 // Estimate based on tree cover
+      : undefined;
+
     const carbonCalc = calculateCarbonCapture({
       areaHectares,
       projectType: input.type,
       forestType,
-      biomassPerHectare: geeAnalysis?.biomassPerHectare,
+      biomassPerHectare,
       durationYears: input.durationYears || undefined,
     });
 
@@ -221,9 +225,9 @@ export async function POST(request: NextRequest) {
         coBenefits: input.coBenefits ? JSON.stringify(input.coBenefits) : null,
         startDate: input.startDate,
         durationYears: input.durationYears,
-        geeVerified: geeAnalysis !== null,
-        geeLastCheck: geeAnalysis ? new Date() : null,
-        forestCoveragePercent: geeAnalysis?.forestCoveragePercent || null,
+        geeVerified: forestCoverage !== null,
+        geeLastCheck: forestCoverage ? new Date() : null,
+        forestCoveragePercent: forestCoverage?.forestCoveragePercent || null,
         createdBy: input.createdBy,
       },
       include: {
@@ -249,13 +253,12 @@ export async function POST(request: NextRequest) {
         success: true,
         data: {
           project,
-          geeAnalysis: geeAnalysis
+          geeAnalysis: forestCoverage
             ? {
-                forestCoveragePercent: geeAnalysis.forestCoveragePercent,
-                biomassPerHectare: geeAnalysis.biomassPerHectare,
-                forestType: geeAnalysis.forestType,
-                verified: geeAnalysis.verified,
-                confidence: geeAnalysis.confidence,
+                totalAreaHectares: forestCoverage.totalAreaHectares,
+                forestAreaHectares: forestCoverage.forestAreaHectares,
+                forestCoveragePercent: forestCoverage.forestCoveragePercent,
+                treeCoverDensity: forestCoverage.treeCoverDensity,
               }
             : null,
           carbonEstimate: {

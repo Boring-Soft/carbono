@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import dynamic from "next/dynamic";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,21 +23,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { CarbonPreview } from "./carbon-preview";
 import { CreateOrganizationDialog } from "../organizaciones/create-organization-dialog";
-import { AreaAnalysisLoader } from "@/components/maps/area-analysis-loader";
-import { useAreaAnalysis } from "@/hooks/use-area-analysis";
-
-// Dynamically import ProjectMapDrawer to avoid SSR issues with Leaflet
-const ProjectMapDrawer = dynamic(
-  () => import("./project-map-drawer").then((mod) => mod.ProjectMapDrawer),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full h-[400px] flex items-center justify-center bg-muted rounded-lg">
-        <div className="text-muted-foreground">Cargando mapa...</div>
-      </div>
-    ),
-  }
-);
+import { ProjectMapDrawer } from "./project-map-drawer";
 import {
   ArrowLeft,
   ArrowRight,
@@ -46,7 +31,6 @@ import {
   Loader2,
   MapPin,
   AlertTriangle,
-  Sparkles,
 } from "lucide-react";
 import { ProjectType } from "@prisma/client";
 import { calculatePolygonArea } from "@/lib/geo/turf-utils";
@@ -106,9 +90,9 @@ interface ProjectFormProps {
 export function ProjectForm({ organizations }: ProjectFormProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [isMapDrawerOpen, setIsMapDrawerOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isMapDrawerOpen, setIsMapDrawerOpen] = useState(false);
 
   const {
     register,
@@ -123,23 +107,7 @@ export function ProjectForm({ organizations }: ProjectFormProps) {
     },
   });
 
-  // Area analysis hook
-  const {
-    analyze,
-    cancel: cancelAnalysis,
-    retry: retryAnalysis,
-    progress: analysisProgress,
-    result: analysisResult,
-    isAnalyzing,
-  } = useAreaAnalysis({
-    onSuccess: (result) => {
-      toast.success("Análisis completado exitosamente");
-      console.log("Analysis result:", result);
-    },
-    onError: (error) => {
-      toast.error(`Error en el análisis: ${error.message}`);
-    },
-  });
+  // No longer needed since we're using a modal instead of navigation
 
   const formData = watch();
   const geometry = watch("geometry");
@@ -147,10 +115,6 @@ export function ProjectForm({ organizations }: ProjectFormProps) {
 
   const totalSteps = 4;
   const progress = (step / totalSteps) * 100;
-
-  const handleMapSave = (newGeometry: GeoJSON.Polygon) => {
-    setValue("geometry", newGeometry, { shouldValidate: true });
-  };
 
   const toggleCoBenefit = (benefit: string) => {
     const current = selectedCoBenefits;
@@ -210,6 +174,16 @@ export function ProjectForm({ organizations }: ProjectFormProps) {
     if (step > 1) {
       setStep(step - 1);
     }
+  };
+
+  const handleOpenMapDrawer = () => {
+    setIsMapDrawerOpen(true);
+  };
+
+  const handleSaveGeometry = (geometry: GeoJSON.Polygon) => {
+    setValue("geometry", geometry);
+    setIsMapDrawerOpen(false);
+    toast.success("Área guardada correctamente");
   };
 
   const canProceedFromStep1 = formData.name && formData.type && formData.organizationId;
@@ -400,96 +374,19 @@ export function ProjectForm({ organizations }: ProjectFormProps) {
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => setIsMapDrawerOpen(true)}
+                            onClick={handleOpenMapDrawer}
                           >
                             Editar
                           </Button>
                         </div>
                       </div>
-
-                      {/* Analyze Area Button */}
-                      {!isAnalyzing && !analysisResult && (
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          className="w-full"
-                          onClick={() => analyze(geometry)}
-                        >
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Analizar Área Detalladamente
-                        </Button>
-                      )}
-
-                      {/* Analysis Loader */}
-                      {analysisProgress && (
-                        <AreaAnalysisLoader
-                          progress={analysisProgress}
-                          onCancel={cancelAnalysis}
-                          onRetry={retryAnalysis}
-                        />
-                      )}
-
-                      {/* Analysis Results Summary */}
-                      {analysisResult && !isAnalyzing && (
-                        <Card className="border-green-200">
-                          <CardContent className="pt-4">
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between">
-                                <p className="text-sm font-medium">Resultados del Análisis</p>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => analyze(geometry)}
-                                >
-                                  <Sparkles className="h-3 w-3 mr-1" />
-                                  Analizar de nuevo
-                                </Button>
-                              </div>
-                              <div className="grid grid-cols-2 gap-2 text-sm">
-                                <div>
-                                  <p className="text-muted-foreground">Cobertura forestal</p>
-                                  <p className="font-medium">
-                                    {analysisResult.forestCoveragePercent.toFixed(1)}%
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="text-muted-foreground">Área de bosque</p>
-                                  <p className="font-medium">
-                                    {analysisResult.forestAreaHectares.toLocaleString("es-BO", {
-                                      maximumFractionDigits: 1,
-                                    })}{" "}
-                                    ha
-                                  </p>
-                                </div>
-                                {analysisResult.trees && (
-                                  <div>
-                                    <p className="text-muted-foreground">Árboles estimados</p>
-                                    <p className="font-medium">
-                                      {analysisResult.trees.toLocaleString("es-BO")}
-                                    </p>
-                                  </div>
-                                )}
-                                {analysisResult.communities && (
-                                  <div>
-                                    <p className="text-muted-foreground">Comunidades</p>
-                                    <p className="font-medium">
-                                      {analysisResult.communities.toLocaleString("es-BO")}
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      )}
                     </div>
                   ) : (
                     <Button
                       type="button"
                       variant="outline"
                       className="w-full"
-                      onClick={() => setIsMapDrawerOpen(true)}
+                      onClick={handleOpenMapDrawer}
                     >
                       <MapPin className="h-4 w-4 mr-2" />
                       Dibujar Área en el Mapa
@@ -683,11 +580,11 @@ export function ProjectForm({ organizations }: ProjectFormProps) {
         </form>
       </div>
 
-      {/* Map Drawer */}
+      {/* Map Drawer Modal */}
       <ProjectMapDrawer
         open={isMapDrawerOpen}
         onOpenChange={setIsMapDrawerOpen}
-        onSave={handleMapSave}
+        onSave={handleSaveGeometry}
         initialGeometry={geometry}
       />
     </>

@@ -10,7 +10,7 @@ import { prisma } from '@/lib/prisma';
 import { updateProjectSchema } from '@/lib/validations/project';
 import { calculatePolygonArea, validatePolygon } from '@/lib/geo/turf-utils';
 import { calculateCarbonCapture } from '@/lib/carbon/calculator';
-import { analyzeArea } from '@/lib/gee/client';
+import { analyzeForestCoverage } from '@/lib/gee/client';
 import { ForestType } from '@/types/gee';
 import { Prisma } from '@prisma/client';
 
@@ -193,7 +193,7 @@ export async function PATCH(
       let geeAnalysis = null;
       if (input.geometry) {
         try {
-          geeAnalysis = await analyzeArea(input.geometry);
+          geeAnalysis = await analyzeForestCoverage(input.geometry);
           updateData.geeVerified = true;
           updateData.geeLastCheck = new Date();
           updateData.forestCoveragePercent = geeAnalysis.forestCoveragePercent;

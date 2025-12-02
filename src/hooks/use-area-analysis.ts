@@ -11,24 +11,53 @@ export type AnalysisStage =
   | "error";
 
 export interface AreaAnalysisResult {
-  // Forest metrics
-  forestAreaHectares: number;
-  forestCoveragePercent: number;
-  estimatedCo2TonsYear: number;
-
-  // OSM elements count
-  trees?: number;
-  rivers?: number;
-  houses?: number;
-  communities?: number;
-
-  // Additional metrics
-  biomass?: number;
-  carbonStock?: number;
-
-  // Metadata
-  analyzedAt: Date;
-  processingTimeSeconds: number;
+  area: {
+    original: number;
+    adjusted: number;
+    unit: string;
+  };
+  trees: {
+    min: number;
+    max: number;
+    average: number;
+    confidence: number;
+    densityLevel: string;
+    treesPerHectare: number;
+  };
+  communities: {
+    total: number;
+    items: Array<{
+      id: string;
+      name: string;
+      type: string;
+      population?: number;
+      coordinates: {
+        latitude: number;
+        longitude: number;
+      };
+    }>;
+  };
+  waterways: {
+    total: number;
+    items: Array<{
+      id: string;
+      name?: string;
+      type: string;
+    }>;
+  };
+  buildings: {
+    total: number;
+  };
+  snapped: {
+    geometry: GeoJSON.Polygon;
+    adjustmentMade: boolean;
+    forestCoverage: number;
+  } | null;
+  metadata: {
+    analyzedAt: string;
+    processingTimeMs: number;
+    dataSource: Record<string, string>;
+  };
 }
 
 export interface AreaAnalysisProgress {
@@ -83,7 +112,6 @@ export function useAreaAnalysis(
 
   const analyze = useCallback(
     async (geometry: GeoJSON.Polygon) => {
-      const startTime = Date.now();
       const controller = new AbortController();
       setAbortController(controller);
       setCurrentGeometry(geometry);
@@ -92,88 +120,61 @@ export function useAreaAnalysis(
 
       try {
         // Stage 1: Connecting to services (0-10%)
-        updateProgress("connecting", 5, "Conectando a Google Earth Engine...", 50);
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate connection
-
-        if (controller.signal.aborted) throw new Error("Analysis cancelled");
-
-        updateProgress("connecting", 10, "Conexión establecida", 45);
-
-        // Stage 2: Analyzing forest coverage (10-40%)
-        updateProgress("analyzing-forest", 15, "Analizando cobertura forestal con imágenes satelitales...", 40);
-
-        const forestAnalysisPromise = fetch("/api/analysis/forest", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ geometry }),
-          signal: controller.signal,
-        }).then((res) => {
-          if (!res.ok) throw new Error("Error analyzing forest coverage");
-          return res.json();
-        });
-
-        updateProgress("analyzing-forest", 25, "Calculando métricas de biomasa...", 30);
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-
-        updateProgress("analyzing-forest", 35, "Estimando captura de CO₂...", 20);
-        const forestData = await forestAnalysisPromise;
-
-        updateProgress("analyzing-forest", 40, "Análisis forestal completado", 15);
-
-        if (controller.signal.aborted) throw new Error("Analysis cancelled");
-
-        // Stage 3: Counting OSM elements (40-70%)
-        updateProgress("counting-elements", 45, "Contando árboles en el área...", 15);
-
-        const osmAnalysisPromise = fetch("/api/analysis/osm-elements", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ geometry }),
-          signal: controller.signal,
-        }).then((res) => {
-          if (!res.ok) throw new Error("Error counting OSM elements");
-          return res.json();
-        });
-
-        updateProgress("counting-elements", 55, "Identificando ríos y cuerpos de agua...", 10);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        updateProgress("counting-elements", 65, "Detectando construcciones y comunidades...", 5);
-        const osmData = await osmAnalysisPromise;
-
-        updateProgress("counting-elements", 70, "Elementos identificados", 3);
-
-        if (controller.signal.aborted) throw new Error("Analysis cancelled");
-
-        // Stage 4: Calculating final metrics (70-90%)
-        updateProgress("calculating-metrics", 75, "Calculando stock de carbono...", 3);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        updateProgress("calculating-metrics", 85, "Generando métricas finales...", 2);
+        updateProgress("connecting", 5, "Iniciando análisis de área...", 30);
         await new Promise((resolve) => setTimeout(resolve, 500));
 
-        updateProgress("calculating-metrics", 90, "Validando resultados", 1);
+        if (controller.signal.aborted) throw new Error("Analysis cancelled");
 
-        // Stage 5: Finalizing (90-100%)
+        updateProgress("connecting", 10, "Conectando con servicios de análisis", 25);
+
+        // Stage 2: Analyzing forest coverage (10-50%)
+        updateProgress("analyzing-forest", 15, "Estimando árboles basado en densidad forestal...", 20);
+
+        // Start the comprehensive analysis
+        const analysisPromise = fetch("/api/analysis/area", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ geometry, snapToForest: false }),
+          signal: controller.signal,
+        }).then((res) => {
+          if (!res.ok) throw new Error("Error al analizar el área");
+          return res.json();
+        });
+
+        updateProgress("analyzing-forest", 30, "Analizando cobertura forestal...", 15);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        updateProgress("analyzing-forest", 45, "Calculando densidad de árboles...", 10);
+        await new Promise((resolve) => setTimeout(resolve, 800));
+
+        updateProgress("analyzing-forest", 50, "Análisis forestal completado", 8);
+
+        if (controller.signal.aborted) throw new Error("Analysis cancelled");
+
+        // Stage 3: Querying OSM data (50-80%)
+        updateProgress("counting-elements", 55, "Buscando comunidades cercanas en OpenStreetMap...", 8);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        updateProgress("counting-elements", 65, "Identificando ríos y cuerpos de agua...", 5);
+        await new Promise((resolve) => setTimeout(resolve, 800));
+
+        updateProgress("counting-elements", 75, "Detectando construcciones...", 3);
+        await new Promise((resolve) => setTimeout(resolve, 600));
+
+        updateProgress("counting-elements", 80, "Procesando datos de OpenStreetMap", 2);
+
+        if (controller.signal.aborted) throw new Error("Analysis cancelled");
+
+        // Wait for analysis to complete
+        const response = await analysisPromise;
+        const analysisResult = response.data as AreaAnalysisResult;
+
+        // Stage 4: Finalizing (80-100%)
+        updateProgress("finalizing", 85, "Compilando resultados...", 2);
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         updateProgress("finalizing", 95, "Preparando reporte...", 1);
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        const endTime = Date.now();
-        const processingTimeSeconds = Math.round((endTime - startTime) / 1000);
-
-        const analysisResult: AreaAnalysisResult = {
-          forestAreaHectares: forestData.data?.forestAreaHectares || 0,
-          forestCoveragePercent: forestData.data?.forestCoveragePercent || 0,
-          estimatedCo2TonsYear: forestData.data?.estimatedCo2TonsYear || 0,
-          biomass: forestData.data?.biomass,
-          carbonStock: forestData.data?.carbonStock,
-          trees: osmData.data?.trees,
-          rivers: osmData.data?.rivers,
-          houses: osmData.data?.houses,
-          communities: osmData.data?.communities,
-          analyzedAt: new Date(),
-          processingTimeSeconds,
-        };
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
         updateProgress("success", 100, "¡Análisis completado exitosamente!", 0);
         setResult(analysisResult);

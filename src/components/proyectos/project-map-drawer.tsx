@@ -14,6 +14,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MapPin, Trash2, Check, AlertTriangle } from "lucide-react";
 import { SatelliteLayerControl, MapViewMode } from "@/components/maps/satellite-layer-control";
 import { TILE_LAYERS } from "@/components/maps/leaflet-map";
+import { AreaAnalysisLoader } from "@/components/maps/area-analysis-loader";
+import { AreaAnalysisDisplay } from "@/components/maps/area-analysis-display";
+import { useAreaAnalysis } from "@/hooks/use-area-analysis";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
@@ -51,6 +54,18 @@ export function ProjectMapDrawer({
   const [isValid, setIsValid] = useState(true);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<MapViewMode>("street");
+
+  // Area analysis hook
+  const { analyze, isAnalyzing, progress, result, error: analysisError } = useAreaAnalysis({
+    onSuccess: (result) => {
+      toast.success(
+        `Análisis completado: ${result.trees.average.toLocaleString("es-BO")} árboles estimados`
+      );
+    },
+    onError: (error) => {
+      toast.error(`Error en análisis: ${error.message}`);
+    },
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -114,14 +129,6 @@ export function ProjectMapDrawer({
       });
       map.addControl(drawControl);
 
-      // Auto-switch to satellite view when drawing starts
-      map.on(L.Draw.Event.DRAWSTART, () => {
-        if (viewMode !== "satellite") {
-          setViewMode("satellite");
-          toast.info("Vista satélite activada para mejor precisión");
-        }
-      });
-
       // Handle drawn shapes
       map.on(L.Draw.Event.CREATED, (e) => {
         const event = e as L.DrawEvents.Created;
@@ -178,16 +185,22 @@ export function ProjectMapDrawer({
 
     // Add new tile layer based on view mode
     const layerConfig = viewMode === "satellite" ? TILE_LAYERS.satellite : TILE_LAYERS.street;
-    const newTileLayer = L.tileLayer(layerConfig.url, {
+    const tileOptions: L.TileLayerOptions = {
       attribution: layerConfig.attribution,
       maxZoom: layerConfig.maxZoom,
-      subdomains: layerConfig.subdomains,
-    });
+    };
+
+    // Only add subdomains if defined
+    if (layerConfig.subdomains) {
+      tileOptions.subdomains = layerConfig.subdomains;
+    }
+
+    const newTileLayer = L.tileLayer(layerConfig.url, tileOptions);
     newTileLayer.addTo(mapRef.current);
     currentTileLayerRef.current = newTileLayer;
   }, [viewMode]);
 
-  const handleLayerCreated = (layer: L.Layer) => {
+  const handleLayerCreated = async (layer: L.Layer) => {
     const geoJson = (layer as L.Polygon | L.Rectangle).toGeoJSON();
     const geometry = geoJson.geometry as GeoJSON.Polygon;
 
@@ -218,6 +231,10 @@ export function ProjectMapDrawer({
       setAreaHectares(area);
       setIsValid(true);
       setValidationError(null);
+
+      // Automatically analyze the drawn area
+      toast.info("Analizando área...");
+      await analyze(geometry);
     } catch {
       setIsValid(false);
       setValidationError("Error al validar el polígono");
@@ -245,7 +262,7 @@ export function ProjectMapDrawer({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-3xl">
+      <SheetContent side="right" className="w-full sm:max-w-3xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Dibujar Área del Proyecto</SheetTitle>
           <SheetDescription>
@@ -254,7 +271,7 @@ export function ProjectMapDrawer({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="mt-6 space-y-4">
+        <div className="mt-6 space-y-4 pb-6">
           {/* Area indicator */}
           {areaHectares && (
             <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
@@ -271,11 +288,27 @@ export function ProjectMapDrawer({
             </div>
           )}
 
+          {/* Analysis Progress */}
+          {isAnalyzing && progress && <AreaAnalysisLoader progress={progress} />}
+
+          {/* Analysis Results */}
+          {result && !isAnalyzing && <AreaAnalysisDisplay result={result} />}
+
           {/* Validation error */}
           {!isValid && validationError && (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>{validationError}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Analysis error */}
+          {analysisError && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                Error en análisis: {analysisError.message}
+              </AlertDescription>
             </Alert>
           )}
 
@@ -285,6 +318,7 @@ export function ProjectMapDrawer({
             <AlertDescription className="text-sm">
               <strong>Instrucciones:</strong>
               <ul className="mt-2 ml-4 list-disc space-y-1">
+                <li>Cambia entre vista Calles/Satélite según prefieras (botones abajo)</li>
                 <li>Usa el botón de polígono para dibujar el área</li>
                 <li>Haz clic en el mapa para agregar puntos</li>
                 <li>Haz doble clic para finalizar el polígono</li>

@@ -1,7 +1,15 @@
 /**
- * Factores de emisión de carbono según el IPCC (2019)
+ * Factores de captura de carbono según el IPCC (2019)
  * Para diferentes tipos de bosque bolivianos
- * Valores expresados en toneladas de CO₂ por hectárea por año (tCO₂/ha/año)
+ *
+ * IMPORTANTE: Estos valores representan la TASA DE CAPTURA ANUAL (flujo),
+ * NO la biomasa total acumulada (stock).
+ *
+ * Valores expresados en toneladas de CO₂ capturadas por hectárea por año (tCO₂/ha/año)
+ * Basados en:
+ * - IPCC 2019 Refinement to the 2006 IPCC Guidelines for National Greenhouse Gas Inventories
+ * - FAO Global Forest Resources Assessment 2020
+ * - Estudios específicos de Bolivia (ABT, FAN)
  */
 
 export type ForestType = 'amazon' | 'chiquitania' | 'yungas' | 'altiplano';
@@ -10,46 +18,46 @@ export interface IPCCFactor {
   forestType: ForestType;
   name: string;
   region: string;
-  biomassPerHectare: number; // tCO₂/ha/año
+  biomassPerHectare: number; // tCO₂/ha/año - TASA DE CAPTURA ANUAL
   source: string;
   departments: string[];
 }
 
 /**
- * Factores de emisión por tipo de bosque boliviano
- * Basados en estudios del IPCC 2019 y adaptados para Bolivia
+ * Tasas de captura anual de CO₂ por tipo de bosque boliviano
+ * Valores conservadores basados en literatura científica
  */
 export const IPCC_FACTORS: Record<ForestType, IPCCFactor> = {
   amazon: {
     forestType: 'amazon',
     name: 'Amazonía Tropical',
     region: 'Norte de Bolivia',
-    biomassPerHectare: 150, // tCO₂/ha/año
-    source: 'IPCC 2019 - Tropical Rainforest',
+    biomassPerHectare: 10, // tCO₂/ha/año (rango: 5-15)
+    source: 'IPCC 2019 - Tropical Rainforest (Table 4.12)',
     departments: ['Pando', 'Beni', 'La Paz'],
   },
   chiquitania: {
     forestType: 'chiquitania',
     name: 'Bosque Seco Chiquitano',
     region: 'Este de Bolivia',
-    biomassPerHectare: 120, // tCO₂/ha/año
-    source: 'IPCC 2019 - Tropical Dry Forest',
+    biomassPerHectare: 5.5, // tCO₂/ha/año (rango: 3-8)
+    source: 'IPCC 2019 - Tropical Dry Forest (Table 4.12)',
     departments: ['Santa Cruz'],
   },
   yungas: {
     forestType: 'yungas',
     name: 'Yungas',
     region: 'Valles de Bolivia',
-    biomassPerHectare: 130, // tCO₂/ha/año
-    source: 'IPCC 2019 - Subtropical Forest',
+    biomassPerHectare: 8, // tCO₂/ha/año (rango: 4-12)
+    source: 'IPCC 2019 - Subtropical Forest (Table 4.12)',
     departments: ['Cochabamba', 'Tarija', 'Chuquisaca'],
   },
   altiplano: {
     forestType: 'altiplano',
     name: 'Altiplano Semiárido',
     region: 'Altiplano Boliviano',
-    biomassPerHectare: 40, // tCO₂/ha/año
-    source: 'IPCC 2019 - Shrubland/Grassland',
+    biomassPerHectare: 2, // tCO₂/ha/año (rango: 1-3)
+    source: 'IPCC 2019 - Shrubland/Grassland (Table 6.2)',
     departments: ['Potosí', 'Oruro'],
   },
 } as const;

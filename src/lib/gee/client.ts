@@ -43,9 +43,6 @@ export async function snapPolygonToForest(
 ): Promise<SnapToForestResult> {
   const {
     threshold = DEFAULT_FOREST_THRESHOLD,
-    scale = 30,
-    maxPixels = 1e10,
-    simplifyTolerance = 50,
   } = options;
 
   // TODO: Implement real GEE integration

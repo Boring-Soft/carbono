@@ -148,24 +148,24 @@ Documento generado para implementar los 7 nuevos features de análisis avanzado 
   - [x] 5.8 Implementar visualización before/after: polígono original en rojo translúcido, ajustado en verde sólido
   - [x] 5.9 Mostrar stats de ajuste: "Ajustado de 1,230 ha → 1,187 ha (bosque real). Excluidas: 43 ha de áreas no boscosas"
 
-- [ ] **6.0 Implementar Filtrado Exclusivo de Zonas Boscosas (Forest Mask Filter)**
-  - [ ] 6.1 Crear API route `/api/gee/forest-mask/route.ts` que retorna solo polígonos de bosque dentro del área seleccionada
-  - [ ] 6.2 Implementar detección de múltiples fragmentos de bosque (puede retornar array de polígonos)
-  - [ ] 6.3 Crear componente `DensityThresholdSlider.tsx` con opciones: 10% (permisivo), 30% (estándar), 50% (estricto), 70% (muy estricto)
-  - [ ] 6.4 Implementar debounce (500ms) en slider para evitar requests excesivos a GEE
-  - [ ] 6.5 Agregar visualización de áreas excluidas: overlay rojo semi-transparente sobre zonas no boscosas
-  - [ ] 6.6 Implementar componente `ForestMaskControl.tsx` que muestra: umbral actual, área original, área filtrada, % reducción
-  - [ ] 6.7 Agregar opción "Aplicar Filtro" que reemplaza polígono original con polígonos filtrados
-  - [ ] 6.8 Implementar preview mode: mostrar filtro sin aplicar, con botón "Aplicar" o "Cancelar"
-  - [ ] 6.9 Guardar metadata del filtro aplicado: threshold usado, fecha de aplicación, área excluida
-  - [ ] 6.10 Agregar badge "Filtrado por Bosque" en project cards que tienen filtro aplicado
+- [x] **6.0 Implementar Filtrado Exclusivo de Zonas Boscosas (Forest Mask Filter)**
+  - [x] 6.1 Crear API route `/api/gee/forest-mask/route.ts` que retorna solo polígonos de bosque dentro del área seleccionada
+  - [x] 6.2 Implementar detección de múltiples fragmentos de bosque (puede retornar array de polígonos)
+  - [x] 6.3 Crear componente `DensityThresholdSlider.tsx` con opciones: 10% (permisivo), 30% (estándar), 50% (estricto), 70% (muy estricto)
+  - [x] 6.4 Implementar debounce (500ms) en slider para evitar requests excesivos a GEE
+  - [x] 6.5 Agregar visualización de áreas excluidas: overlay rojo semi-transparente sobre zonas no boscosas
+  - [x] 6.6 Implementar componente `ForestMaskControl.tsx` que muestra: umbral actual, área original, área filtrada, % reducción
+  - [x] 6.7 Agregar opción "Aplicar Filtro" que reemplaza polígono original con polígonos filtrados
+  - [x] 6.8 Implementar preview mode: mostrar filtro sin aplicar, con botón "Aplicar" o "Cancelar"
+  - [x] 6.9 Guardar metadata del filtro aplicado: threshold usado, fecha de aplicación, área excluida
+  - [x] 6.10 Agregar badge "Filtrado por Bosque" en project cards que tienen filtro aplicado
 
-- [ ] **7.0 Crear Documentación Técnica Completa de Lógica de Áreas**
-  - [ ] 7.1 Crear `docs/architecture/area-analysis.md` con diagrama de flujo del sistema de análisis
-  - [ ] 7.2 Documentar en `docs/guides/area-calculation-logic.md`: fórmulas de cálculo, conversiones (m² → ha → km²), proyecciones geográficas
-  - [ ] 7.3 Crear ejemplos de código reales para: calcular área con Turf.js, validar polígonos, detectar auto-intersecciones
-  - [ ] 7.4 Documentar integración GEE: autenticación, rate limits, datasets usados, best practices de caché
-  - [ ] 7.5 Crear guía de troubleshooting para errores comunes: credenciales GEE inválidas, polígono fuera de Bolivia, timeout de APIs
+- [x] **7.0 Crear Documentación Técnica Completa de Lógica de Áreas**
+  - [x] 7.1 Crear `docs/architecture/area-analysis.md` con diagrama de flujo del sistema de análisis
+  - [x] 7.2 Documentar en `docs/guides/area-calculation-logic.md`: fórmulas de cálculo, conversiones (m² → ha → km²), proyecciones geográficas
+  - [x] 7.3 Crear ejemplos de código reales para: calcular área con Turf.js, validar polígonos, detectar auto-intersecciones
+  - [x] 7.4 Documentar integración GEE: autenticación, rate limits, datasets usados, best practices de caché
+  - [x] 7.5 Crear guía de troubleshooting para errores comunes: credenciales GEE inválidas, polígono fuera de Bolivia, timeout de APIs
 
 ## Success Criteria
 

@@ -9,6 +9,7 @@ import { FiltersBar, DashboardFilters } from "@/components/dashboard/carbono/fil
 import { TrendCharts } from "@/components/dashboard/carbono/trend-charts";
 import { NationalForestStats } from "@/components/dashboard/carbono/national-forest-stats";
 import { SatelliteLayerControl, MapViewMode } from "@/components/maps/satellite-layer-control";
+import { ForestBoundariesControl } from "@/components/maps/forest-boundaries-control";
 import { ProjectMarkerData } from "@/components/maps/project-marker";
 import { AlertMarkerData } from "@/components/maps/alert-marker";
 import { ProjectStatus } from "@prisma/client";
@@ -131,6 +132,7 @@ export default function DashboardCarbonoPage() {
   const [filters, setFilters] = useState<DashboardFilters>({});
   const [showProjects, setShowProjects] = useState(true);
   const [showAlerts, setShowAlerts] = useState(true);
+  const [showForestBoundaries, setShowForestBoundaries] = useState(true);
   const [viewMode, setViewMode] = useState<MapViewMode>("street");
   const satelliteView = viewMode === "satellite";
 
@@ -185,11 +187,15 @@ export default function DashboardCarbonoPage() {
       {/* Map Section */}
       <div className="grid gap-4 md:grid-cols-4">
         <div className="md:col-span-3 relative">
-          {/* Satellite Layer Control - Positioned absolutely over map */}
-          <div className="absolute top-4 right-4 z-[1000]">
+          {/* Map Controls - Positioned absolutely over map */}
+          <div className="absolute top-4 right-4 z-[1000] space-y-2">
             <SatelliteLayerControl
               viewMode={viewMode}
               onViewModeChange={setViewMode}
+            />
+            <ForestBoundariesControl
+              enabled={showForestBoundaries}
+              onToggle={setShowForestBoundaries}
             />
           </div>
           <CarbonMap
@@ -197,6 +203,7 @@ export default function DashboardCarbonoPage() {
             alerts={alerts}
             showProjects={showProjects}
             showAlerts={showAlerts}
+            showForestBoundaries={showForestBoundaries}
             satelliteView={satelliteView}
             className="w-full h-[600px]"
           />
