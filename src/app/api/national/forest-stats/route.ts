@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 /**
  * National Forest Stats API
@@ -175,11 +176,11 @@ export async function GET(request: NextRequest) {
       where: { cacheKey: CACHE_KEY },
       create: {
         cacheKey: CACHE_KEY,
-        data: stats as any,
+        data: stats as unknown as Prisma.InputJsonValue,
         expiresAt,
       },
       update: {
-        data: stats as any,
+        data: stats as unknown as Prisma.InputJsonValue,
         expiresAt,
       },
     });

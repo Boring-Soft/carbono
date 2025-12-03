@@ -10,6 +10,8 @@
  * Note: Requires GEE service account credentials
  */
 
+import { ForestType } from "@/types/gee";
+
 // Forest coverage threshold (0-100%)
 const DEFAULT_FOREST_THRESHOLD = 70;
 
@@ -117,17 +119,21 @@ export async function getForestMask(
  * Analyze forest coverage within polygon
  */
 export async function analyzeForestCoverage(
-  geometry: GeoJSON.Polygon
+  geometry: GeoJSON.Polygon | GeoJSON.MultiPolygon
 ): Promise<{
   totalAreaHectares: number;
   forestAreaHectares: number;
   forestCoveragePercent: number;
   treeCoverDensity: number;
+  forestType?: ForestType;
+  biomassPerHectare?: number;
 }> {
   // TODO: Implement real GEE forest analysis
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  const totalAreaHectares = calculatePolygonAreaFromCoords(geometry.coordinates[0]);
+  // Handle both Polygon and MultiPolygon
+  const coords = geometry.type === "Polygon" ? geometry.coordinates[0] : geometry.coordinates[0][0];
+  const totalAreaHectares = calculatePolygonAreaFromCoords(coords);
   const forestCoveragePercent = 60 + Math.random() * 35; // 60-95%
   const forestAreaHectares = (totalAreaHectares * forestCoveragePercent) / 100;
   const treeCoverDensity = forestCoveragePercent;
@@ -137,6 +143,8 @@ export async function analyzeForestCoverage(
     forestAreaHectares,
     forestCoveragePercent,
     treeCoverDensity,
+    forestType: ForestType.AMAZONIA,
+    biomassPerHectare: 150, // Mock value
   };
 }
 
@@ -163,6 +171,89 @@ function calculatePolygonAreaFromCoords(coordinates: number[][]): number {
   const areaHectares = areaKm2 * 100;
 
   return Math.round(areaHectares);
+}
+
+/**
+ * Analyze area with GEE
+ * Returns forest coverage, biomass, and forest type for a given area
+ */
+export async function analyzeArea(
+  _geometry: GeoJSON.Polygon | GeoJSON.MultiPolygon
+): Promise<{
+  forestCoveragePercent: number;
+  forestAreaHectares: number;
+  totalAreaHectares: number;
+  biomassPerHectare?: number;
+  totalBiomass?: number;
+}> {
+  // TODO: Implement real GEE area analysis
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const totalAreaHectares = 100; // Mock calculation
+  const forestCoveragePercent = 75;
+  const forestAreaHectares = (totalAreaHectares * forestCoveragePercent) / 100;
+
+  return {
+    forestCoveragePercent,
+    forestAreaHectares,
+    totalAreaHectares,
+    biomassPerHectare: 150,
+    totalBiomass: forestAreaHectares * 150,
+  };
+}
+
+/**
+ * Get NDVI time series for a given area and date range
+ */
+export async function getNDVITimeSeries(
+  _geometry: GeoJSON.Polygon | GeoJSON.MultiPolygon,
+  startDate: Date,
+  endDate: Date
+): Promise<Array<{ date: Date; ndvi: number; quality: number }>> {
+  // TODO: Implement real NDVI time series from GEE
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const timeSeries = [];
+  const current = new Date(startDate);
+
+  while (current <= endDate) {
+    timeSeries.push({
+      date: new Date(current),
+      ndvi: 0.6 + Math.random() * 0.3, // Mock NDVI 0.6-0.9
+      quality: 80 + Math.random() * 20, // Mock quality 80-100
+    });
+    current.setMonth(current.getMonth() + 1); // Monthly intervals
+  }
+
+  return timeSeries;
+}
+
+/**
+ * Detect forest loss in a given area and year range
+ */
+export async function detectForestLoss(
+  _geometry: GeoJSON.Polygon | GeoJSON.MultiPolygon,
+  startYear: number,
+  endYear: number
+): Promise<{
+  hasLoss: boolean;
+  lossPercent: number;
+  lastChangeYear?: number;
+  lossAreaHectares?: number;
+}> {
+  // TODO: Implement real forest loss detection using Hansen dataset
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const hasLoss = Math.random() > 0.5;
+  const lossPercent = hasLoss ? Math.random() * 15 : 0; // 0-15% loss
+  const lastChangeYear = hasLoss ? startYear + Math.floor(Math.random() * (endYear - startYear + 1)) : undefined;
+
+  return {
+    hasLoss,
+    lossPercent,
+    lastChangeYear,
+    lossAreaHectares: hasLoss ? lossPercent * 10 : 0, // Mock calculation
+  };
 }
 
 /**

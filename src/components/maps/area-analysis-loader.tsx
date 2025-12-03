@@ -8,7 +8,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Satellite,
   Trees,
-  Home,
   Calculator,
   CheckCircle2,
   XCircle,
@@ -165,22 +164,14 @@ export function AreaAnalysisLoader({
         {isAnalyzing && (
           <div className="flex items-center justify-between pt-2">
             {[
-              { stage: "connecting", label: "Conexión" },
-              { stage: "analyzing-forest", label: "Bosque" },
-              { stage: "counting-elements", label: "Elementos" },
-              { stage: "calculating-metrics", label: "Métricas" },
-              { stage: "finalizing", label: "Finalizar" },
-            ].map((item, index) => {
+              { stage: "connecting" as const, label: "Conexión", threshold: 10 },
+              { stage: "analyzing-forest" as const, label: "Bosque", threshold: 40 },
+              { stage: "counting-elements" as const, label: "Elementos", threshold: 70 },
+              { stage: "calculating-metrics" as const, label: "Métricas", threshold: 90 },
+              { stage: "finalizing" as const, label: "Finalizar", threshold: 95 },
+            ].map((item) => {
               const isActive = progress.stage === item.stage;
-              const isCompleted =
-                progress.progress >
-                {
-                  connecting: 10,
-                  "analyzing-forest": 40,
-                  "counting-elements": 70,
-                  "calculating-metrics": 90,
-                  finalizing: 95,
-                }[item.stage as keyof typeof STAGE_CONFIGS];
+              const isCompleted = progress.progress > item.threshold;
 
               return (
                 <div key={item.stage} className="flex flex-col items-center gap-1">

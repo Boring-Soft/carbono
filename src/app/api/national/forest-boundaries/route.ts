@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 /**
  * National Forest Boundaries API
@@ -248,11 +249,11 @@ export async function GET(request: NextRequest) {
       where: { cacheKey: CACHE_KEY },
       create: {
         cacheKey: CACHE_KEY,
-        data: response as any,
+        data: response as unknown as Prisma.InputJsonValue,
         expiresAt,
       },
       update: {
-        data: response as any,
+        data: response as unknown as Prisma.InputJsonValue,
         expiresAt,
       },
     });

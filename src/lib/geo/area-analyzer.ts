@@ -20,15 +20,15 @@ import {
   parseBuildings,
   parseCommunities,
   parseTrees,
-  type WaterwayData,
-  type BuildingData,
-  type CommunityData,
   type TreeData,
 } from "../osm/parser";
 import type {
   AreaAnalysisResult,
   ForestMetrics,
   TreeEstimation,
+  WaterwayData as AnalysisWaterwayData,
+  BuildingData as AnalysisBuildingData,
+  CommunityData as AnalysisCommunityData,
 } from "@/types/analysis";
 
 // Carbon calculation constants
@@ -98,9 +98,9 @@ export async function analyzeArea(
       : getDefaultForestMetrics(areaHectares);
 
   // Process OSM results
-  let waterways: WaterwayData;
-  let buildings: BuildingData;
-  let communities: CommunityData;
+  let waterways: AnalysisWaterwayData;
+  let buildings: AnalysisBuildingData;
+  let communities: AnalysisCommunityData;
   let trees: TreeEstimation;
 
   if (osmResult.status === "fulfilled" && osmResult.value) {
@@ -126,7 +126,12 @@ export async function analyzeArea(
         lengthKm: r.lengthKm,
       })),
       totalLengthKm: waterwaysParsed.estimatedLengthKm,
-      majorWaterways: waterwaysParsed.rivers.filter((r) => r.name),
+      majorWaterways: waterwaysParsed.rivers.filter((r) => r.name).map((r) => ({
+        id: r.id,
+        name: r.name,
+        type: r.type as "river" | "stream" | "canal",
+        lengthKm: r.lengthKm,
+      })),
     };
 
     buildings = {
@@ -150,7 +155,7 @@ export async function analyzeArea(
       list: communitiesParsed.communities.map((c) => ({
         id: c.id,
         name: c.name,
-        type: c.type as any,
+        type: c.type as AnalysisCommunityData["list"][0]["type"],
         population: c.population,
         estimatedPopulation: c.population || getEstimatedPopulation(c.type),
       })),
@@ -247,7 +252,7 @@ function getDefaultForestMetrics(areaHectares: number): ForestMetrics {
   };
 }
 
-function getDefaultWaterways(): any {
+function getDefaultWaterways(): AnalysisWaterwayData {
   return {
     total: 0,
     rivers: 0,
@@ -259,7 +264,7 @@ function getDefaultWaterways(): any {
   };
 }
 
-function getDefaultBuildings(): any {
+function getDefaultBuildings(): AnalysisBuildingData {
   return {
     total: 0,
     residential: 0,
@@ -271,7 +276,7 @@ function getDefaultBuildings(): any {
   };
 }
 
-function getDefaultCommunities(): any {
+function getDefaultCommunities(): AnalysisCommunityData {
   return {
     total: 0,
     villages: 0,
@@ -348,8 +353,8 @@ function getTreeConfidence(treeData: TreeData): "low" | "medium" | "high" {
 
 function calculateConservationPriority(
   forest: ForestMetrics,
-  communities: any,
-  buildings: any
+  communities: AnalysisCommunityData,
+  buildings: AnalysisBuildingData
 ): "low" | "medium" | "high" {
   // High priority: High forest coverage + low population
   if (forest.forestCoveragePercent > 70 && communities.total < 3) {

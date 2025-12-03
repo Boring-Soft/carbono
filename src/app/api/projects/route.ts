@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Calculate carbon capture
-    const forestType: ForestType = ForestType.TROPICAL; // Default for Bolivia
+    const forestType: ForestType = ForestType.AMAZONIA; // Default for Bolivia
     const biomassPerHectare = forestCoverage
       ? (forestCoverage.treeCoverDensity / 100) * 200 // Estimate based on tree cover
       : undefined;

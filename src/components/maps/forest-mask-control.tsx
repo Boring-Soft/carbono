@@ -4,15 +4,21 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
 import { DensityThresholdSlider } from "./density-threshold-slider";
 import { useForestMask } from "@/hooks/use-forest-mask";
 import { Check, X, Loader2, Filter, AlertTriangle, TrendingDown } from "lucide-react";
 import { toast } from "sonner";
 
+interface ForestMaskMetadata {
+  threshold: number;
+  simplifyTolerance: number;
+  processedAt: string;
+  source: string;
+}
+
 interface ForestMaskControlProps {
   geometry: GeoJSON.Polygon | null;
-  onApplyFilter: (forestPolygons: GeoJSON.Polygon[], metadata: any) => void;
+  onApplyFilter: (forestPolygons: GeoJSON.Polygon[], metadata: ForestMaskMetadata) => void;
   className?: string;
 }
 

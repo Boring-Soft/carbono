@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { calculateCarbonCaptureByDepartment } from "@/lib/carbon/calculator";
 import { ProjectType } from "@prisma/client";
@@ -16,7 +16,7 @@ import { ProjectType } from "@prisma/client";
 
 export const maxDuration = 300; // 5 minutes
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     console.log("🔄 Iniciando recalculación de estimaciones de CO2...");
 
@@ -45,13 +45,13 @@ export async function GET(request: NextRequest) {
       try {
         // Recalcular CO2 usando los factores IPCC actualizados
         const carbonCalc = calculateCarbonCaptureByDepartment(
-          project.areaHectares,
+          project.areaHectares.toNumber(),
           project.type as ProjectType,
           project.department,
           project.durationYears || undefined
         );
 
-        const oldCo2 = project.estimatedCo2TonsYear;
+        const oldCo2 = project.estimatedCo2TonsYear?.toNumber() || 0;
         const newCo2 = carbonCalc.estimatedCo2TonsYear;
 
         // Actualizar proyecto
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
           id: project.id,
           name: project.name,
           department: project.department,
-          areaHectares: project.areaHectares,
+          areaHectares: project.areaHectares.toNumber(),
           oldCo2,
           newCo2,
           change: ((newCo2 - oldCo2) / oldCo2) * 100,

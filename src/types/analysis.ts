@@ -141,6 +141,6 @@ export interface AnalysisProgress {
 export interface AnalysisError {
   code: string;
   message: string;
-  details?: any;
+  details?: Record<string, unknown>;
   retryable: boolean;
 }

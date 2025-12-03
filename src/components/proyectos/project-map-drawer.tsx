@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import {
   Sheet,
   SheetContent,
@@ -66,6 +66,49 @@ export function ProjectMapDrawer({
       toast.error(`Error en análisis: ${error.message}`);
     },
   });
+
+  const handleLayerCreated = useCallback(async (layer: L.Layer) => {
+    const geoJson = (layer as L.Polygon | L.Rectangle).toGeoJSON();
+    const geometry = geoJson.geometry as GeoJSON.Polygon;
+
+    // Validate polygon
+    try {
+      const inBolivia = isPolygonInBolivia(geometry);
+      if (!inBolivia) {
+        setIsValid(false);
+        setValidationError(
+          "El polígono debe estar dentro del territorio boliviano"
+        );
+        setCurrentPolygon(null);
+        setAreaHectares(null);
+        return;
+      }
+
+      // Calculate area
+      const area = calculatePolygonArea(geometry);
+      if (area < 1) {
+        setIsValid(false);
+        setValidationError("El área mínima debe ser de 1 hectárea");
+        setCurrentPolygon(null);
+        setAreaHectares(null);
+        return;
+      }
+
+      setCurrentPolygon(geometry);
+      setAreaHectares(area);
+      setIsValid(true);
+      setValidationError(null);
+
+      // Automatically analyze the drawn area
+      toast.info("Analizando área...");
+      await analyze(geometry);
+    } catch {
+      setIsValid(false);
+      setValidationError("Error al validar el polígono");
+      setCurrentPolygon(null);
+      setAreaHectares(null);
+    }
+  }, [analyze]);
 
   useEffect(() => {
     if (!open) return;
@@ -174,7 +217,7 @@ export function ProjectMapDrawer({
         mapRef.current = null;
       }
     };
-  }, [open, initialGeometry, viewMode]);
+  }, [open, initialGeometry, viewMode, handleLayerCreated]);
 
   // Handle view mode changes dynamically
   useEffect(() => {
@@ -199,49 +242,6 @@ export function ProjectMapDrawer({
     newTileLayer.addTo(mapRef.current);
     currentTileLayerRef.current = newTileLayer;
   }, [viewMode]);
-
-  const handleLayerCreated = async (layer: L.Layer) => {
-    const geoJson = (layer as L.Polygon | L.Rectangle).toGeoJSON();
-    const geometry = geoJson.geometry as GeoJSON.Polygon;
-
-    // Validate polygon
-    try {
-      const inBolivia = isPolygonInBolivia(geometry);
-      if (!inBolivia) {
-        setIsValid(false);
-        setValidationError(
-          "El polígono debe estar dentro del territorio boliviano"
-        );
-        setCurrentPolygon(null);
-        setAreaHectares(null);
-        return;
-      }
-
-      // Calculate area
-      const area = calculatePolygonArea(geometry);
-      if (area < 1) {
-        setIsValid(false);
-        setValidationError("El área mínima debe ser de 1 hectárea");
-        setCurrentPolygon(null);
-        setAreaHectares(null);
-        return;
-      }
-
-      setCurrentPolygon(geometry);
-      setAreaHectares(area);
-      setIsValid(true);
-      setValidationError(null);
-
-      // Automatically analyze the drawn area
-      toast.info("Analizando área...");
-      await analyze(geometry);
-    } catch {
-      setIsValid(false);
-      setValidationError("Error al validar el polígono");
-      setCurrentPolygon(null);
-      setAreaHectares(null);
-    }
-  };
 
   const handleClear = () => {
     if (drawnItemsRef.current) {
