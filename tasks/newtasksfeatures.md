@@ -187,7 +187,7 @@ Documento generado para implementar los 7 nuevos features de análisis avanzado 
 - ✅ Datos se cachean por 24h
 - ✅ Actualización manual funciona (admin only)
 
-### Feature #4 - Análisis Detallado
+### Feature #4 - Análisis Detallados
 - ✅ API retorna estimación de árboles con rango (min-max) y confianza
 - ✅ Ríos, edificios, comunidades muestran datos reales de OSM
 - ✅ Análisis completo de área 100 km² termina en <30s

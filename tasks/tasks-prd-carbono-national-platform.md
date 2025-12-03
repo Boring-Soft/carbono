@@ -159,7 +159,7 @@
 ### Testing (Opcional para MVP, mencionado en roadmap)
 - `src/lib/carbon/__tests__/calculator.test.ts` - Tests de calculadora de carbono
 - `src/lib/geo/__tests__/turf-utils.test.ts` - Tests de utilidades geoespaciales
-- `tests/e2e/project-registration.spec.ts` - Test E2E de registro de proyecto (Playwright)
+- `tests/e2e/project-registration.spec.ts` - Test E2E de registro de proyecto (Playwright) que se debe realizar
 
 ### Notas
 - Los componentes de UI de shadcn/ui ya están instalados, se reutilizarán
