@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ProjectForm } from "@/components/proyectos/project-form";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -11,6 +11,12 @@ interface Organization {
   name: string;
   type: string;
 }
+
+// Dynamically import ProjectForm with SSR disabled due to Leaflet dependencies
+const ProjectForm = dynamic(
+  () => import("@/components/proyectos/project-form").then((mod) => ({ default: mod.ProjectForm })),
+  { ssr: false, loading: () => <div className="text-center py-8 text-muted-foreground">Cargando formulario...</div> }
+);
 
 export default function NuevoProyectoPage() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
