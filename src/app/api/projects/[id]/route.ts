@@ -13,6 +13,7 @@ import { calculateCarbonCapture } from '@/lib/carbon/calculator';
 import { analyzeForestCoverage } from '@/lib/gee/client';
 import { ForestType } from '@/types/gee';
 import { Prisma } from '@prisma/client';
+import { auditProjectDelete, auditProjectUpdate } from '@/lib/audit';
 
 export const maxDuration = 60;
 
@@ -225,6 +226,15 @@ export async function PATCH(
       },
     });
 
+    // Audit log
+    await auditProjectUpdate(
+      request,
+      id,
+      updatedProject.name,
+      existingProject as Record<string, unknown>,
+      input as Record<string, unknown>
+    );
+
     return NextResponse.json({
       success: true,
       data: updatedProject,
@@ -284,6 +294,12 @@ export async function DELETE(
     await prisma.project.update({
       where: { id },
       data: { active: false },
+    });
+
+    // Audit log
+    await auditProjectDelete(request, {
+      id: project.id,
+      name: project.name,
     });
 
     return NextResponse.json({

@@ -13,6 +13,7 @@ import { analyzeForestCoverage } from '@/lib/gee/client';
 import { ForestType } from '@/types/gee';
 import { Prisma } from '@prisma/client';
 import { ZodError } from 'zod';
+import { auditProjectCreate } from '@/lib/audit';
 
 export const maxDuration = 60; // 60 seconds for GEE analysis
 
@@ -245,6 +246,12 @@ export async function POST(request: NextRequest) {
         changedBy: input.createdBy,
         notes: 'Proyecto creado',
       },
+    });
+
+    // 8. Audit log
+    await auditProjectCreate(request, {
+      id: project.id,
+      name: project.name,
     });
 
     // Return project with analysis data

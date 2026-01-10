@@ -236,3 +236,25 @@ model ApiCache {
   @@index([expiresAt])
   @@map("api_cache")
 }
+
+model AuditLog {
+  id           String    @id @default(cuid())
+  action       String    // CREATE, UPDATE, DELETE, STATUS_CHANGE
+  entity       String    // PROJECT, ORGANIZATION, USER, etc.
+  entityId     String
+  entityName   String?   // Nombre del registro afectado
+  userId       String?
+  userEmail    String?
+  ipAddress    String?
+  userAgent    String?
+  changes      Json?     // Datos antes/después del cambio
+  metadata     Json?     // Información adicional contextual
+  createdAt    DateTime  @default(now())
+
+  @@index([entityId])
+  @@index([entity])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
