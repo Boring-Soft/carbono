@@ -62,7 +62,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider defaultTheme="dark" storageKey="app-theme">
+        <ThemeProvider defaultTheme="light" storageKey="app-theme">
           <AuthProvider>
             <QueryProvider>
               {children}
